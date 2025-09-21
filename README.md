@@ -6,6 +6,7 @@ TEAM MEMBERS (Name, Student Id, GitHub user name) :
 - Jennifer Avakian ( 40263197 ) jenzo2903
 - Jean Zhang ( 40177899 ) malakai456
 - Ashfakur Rahman ( 40287274 ) ash2450
+- Serena Zafari (40316423)  serenazaf
 
 
 
@@ -38,3 +39,11 @@ CORE FEATURES:
 -View event analytics (tickets issued, attendance, remaining capacity).
 -Export attendee lists (CSV).
 -Validate tickets with an integrated QR scanner.
+
+3. Administrator Dashboard & Moderation
+-Approve organizers actions.
+-Moderate event listings for compliance.
+-View global stats (number of events, tickets issued, participation trends).
+-Manage organizations and assign roles.
+
+The goal is to streamline event management, increase student engagement, and provide actionable insights for administrators and organizers.  

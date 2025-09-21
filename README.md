@@ -5,6 +5,7 @@ TEAM MEMBERS (Name, Student Id, GitHub user name) :
 - Mekouar Ali ( 40273411 ) allix05
 - Jennifer Avakian ( 40263197 ) jenzo2903
 - Jean Zhang ( 40177899 ) malakai456
+- Ashfakur Rahman ( 40287274 ) ash2450
 
 
 
@@ -31,3 +32,9 @@ CORE FEATURES:
 -Claim free or paid tickets.
 -Receive a unique QR code ticket for entry.
 -Students could register for notifications(SMS or mail) of upcoming events.
+
+2. Organizer Event Management
+-Create and manage events for the calendar (title, description, date/time, location, ticket capacity, type).
+-View event analytics (tickets issued, attendance, remaining capacity).
+-Export attendee lists (CSV).
+-Validate tickets with an integrated QR scanner.

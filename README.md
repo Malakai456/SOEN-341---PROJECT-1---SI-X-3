@@ -7,6 +7,7 @@ TEAM MEMBERS (Name, Student Id, GitHub user name) :
 - Jean Zhang ( 40177899 ) malakai456
 - Ashfakur Rahman ( 40287274 ) ash2450
 - Serena Zafari (40316423)  serenazaf
+- Sarah El Mzouri ( 40318344 ) sarahelmz
 
 
 
@@ -47,3 +48,20 @@ CORE FEATURES:
 -Manage organizations and assign roles.
 
 The goal is to streamline event management, increase student engagement, and provide actionable insights for administrators and organizers.  
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+LANGUAGES AND TECHNIQUE:
+
+For the frontend we are planning to use:
+
+HTML & CSS for the styling and structure of the pages 
+Javascript for the logic and user interactivity 
+React (not sure yet)
+
+For the backend:
+
+We will be using either Node.js + Express or PHP. This will allow the frontend to interact with the backend data. In addition, this is necessary for handling user authentication and also QR code generation. 
+

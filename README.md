@@ -8,6 +8,7 @@ TEAM MEMBERS (Name, Student Id, GitHub user name) :
 - Ashfakur Rahman ( 40287274 ) ash2450
 - Serena Zafari (40316423)  serenazaf
 - Sarah El Mzouri ( 40318344 ) sarahelmz
+- Souhail Ouchai (40286766) Souhvvl
 
 
 
@@ -49,9 +50,6 @@ CORE FEATURES:
 
 The goal is to streamline event management, increase student engagement, and provide actionable insights for administrators and organizers.  
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 LANGUAGES AND TECHNIQUE:
 
@@ -64,4 +62,8 @@ React (not sure yet)
 For the backend:
 
 We will be using either Node.js + Express or PHP. This will allow the frontend to interact with the backend data. In addition, this is necessary for handling user authentication and also QR code generation. 
+
+For the database we will use a relation database such as MySQL (or PostgreSQL if hosting is required) for defining schemas, constraints, and querying data and store all user accounts, roles, events, ticket claims, etc.
+Access can be made through the backend (Node/Express or Django) using safe parameterized queries or an ORM. (TBD)
+
 

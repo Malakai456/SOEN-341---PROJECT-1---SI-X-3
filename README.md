@@ -9,7 +9,7 @@ TEAM MEMBERS (Name, Student Id, GitHub user name) :
 - Serena Zafari (40316423)  serenazaf
 - Sarah El Mzouri ( 40318344 ) sarahelmz
 - Souhail Ouchai (40286766) Souhvvl
-
+- Idriss Benabdessadek ( 40248720 ) idrissben03
 
 
 
@@ -50,6 +50,9 @@ CORE FEATURES:
 
 The goal is to streamline event management, increase student engagement, and provide actionable insights for administrators and organizers.  
 
+Last Core Feature (TBD) 
+- The extra feature is not yet decided. 
+
 
 LANGUAGES AND TECHNIQUE:
 
@@ -57,7 +60,7 @@ For the frontend we are planning to use:
 
 HTML & CSS for the styling and structure of the pages 
 Javascript for the logic and user interactivity 
-React (not sure yet)
+React (not sure yet) 
 
 For the backend:
 

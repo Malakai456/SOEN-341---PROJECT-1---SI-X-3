@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Events - CampusEvents</title>
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+
+<header>
+    <h2 class="logo"></h2>
+    <h2 class="companyname">CampusEvents</h2>
+    <nav class="navigation">
+        <a href="mainpage.html">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="register.html" class="signInButton">Sign In</a>
+        <a href="login.html" class="loginbutton">Log In</a>
+    </nav>
+</header>
+
+<main>
+<div class="filter-bar">
+    <label for="filterType">Filter by:</label>
+    <select id="filterType">
+        <option value="club">Club</option>
+        <option value="price">Price</option>
+        <option value="date">Date</option>
+    </select>
+
+    <label for="filterValue">Select:</label>
+    <select id="filterValue">
+    </select>
+</div>
+
+<div class="event-grid" id="eventGrid">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
+<script>
+const events = [
+    { title:"Hackathon 2025", date:"2025-12-15", time : "8 am ",location:"Engineering Club", price:10, image:"hackathon.png", details:"24-hour coding challenge!" },
+    { title:"Karaoke Night", date:"2025-02-21", time : "6 pm ",location:"Business Club", price:5, image:"karaoke.png", details:"Sing your heart out" },
+    { title:"Arts and Crafts", date:"2025-03-25", time :"5 pm ",location:"Arts Club", price:8, image:"artsandcrafts.png", details:"Explore arts and painting ." },
+    { title:"Chess Night", date:"2025-04-02", time : "7 pm" ,location:"Finance Club", price:7, image:"chess.png", details:"Chess tournament 1V1" },
+    { title:"Movie Night", date:"2025-01-10", time : "8 pm" ,location:"Cinema Club", price:6, image:"movie.png", details:"Watch latest movies together." },
+    { title:"Cooking Workshop", date:"2025-02-28", time : "4 pm" ,location:"Culinary Club", price:12, image:"cooking.png", details:"Learn some delicious recipes." },
+    { title:"Dance Battle", date:"2025-03-15", time : "6 pm" , location:"Dance Club", price:8, image:"dance.png", details:"Show your moves." },
+    { title:"Gaming Tournament", date:"2025-05-05", time : "5 pm" ,location:"Gaming Club", price:10, image:"gaming.png", details:"Compete in esports." },
+    { title:"Book Club Meetup", date:"2025-06-12", time : "11 am" , location:"Library", price:5, image:"book.png", details:"Discuss latest books." }
+];
+
+const eventGrid = document.getElementById('eventGrid');
+events.forEach(event => {
+    const card = document.createElement('div');
+    card.classList.add('event-card', 'mix', event.location.replace(/\s+/g,''));
+    card.setAttribute('data-price', event.price);
+    card.setAttribute('data-date', event.date);
+    card.setAttribute('data-club', event.location.replace(/\s+/g,''));
+    card.innerHTML = `
+        <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
+        <h3>${event.title}</h3>
+        <p><strong>Date:</strong> ${event.date}</p>
+        <p><strong>Time:</strong> ${event.time}</p>
+        <p><strong>Location:</strong> ${event.location}</p>
+        <p>${event.details || ''}</p>
+        <div class="event-footer">
+            <span class="price">$${event.price}</span>
+            <button class="buy-button">Buy</button>
+        </div>
+    `;
+
+    eventGrid.appendChild(card);
+});
+
+const mixer = mixitup('#eventGrid', {
+    selectors: { target: '.mix' },
+    animation: { duration: 300 }
+});
+
+const filterType = document.getElementById('filterType');
+const filterValue = document.getElementById('filterValue');
+
+function updateFilterOptions() {
+    filterValue.innerHTML = '';
+    const type = filterType.value;
+    let uniqueOptions = [];
+    if(type === 'club') uniqueOptions = [...new Set(events.map(e => e.location))];
+    if(type === 'price') uniqueOptions = [...new Set(events.map(e => e.price))];
+    if(type === 'date') uniqueOptions = [...new Set(events.map(e => e.date))];
+
+    filterValue.innerHTML = `<option value="all">All</option>`;
+    uniqueOptions.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = type === 'club' ? '.' + opt.replace(/\s+/g,'') : `[data-${type}='${opt}']`;
+        option.textContent = opt;
+        filterValue.appendChild(option);
+    });
+    mixer.filter('all');
+}
+
+filterType.addEventListener('change', updateFilterOptions);
+filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
+
+updateFilterOptions();
+</script>

@@ -47,7 +47,7 @@ body {
 .input-text input:focus {
     border: 2px solid #1c5edd;
     outline: none;
-}
+} 
 
 button {
     background: #1c5edd;

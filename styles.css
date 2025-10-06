@@ -152,15 +152,20 @@ section {
   max-width: 900px;
   margin: 0 auto;
   padding: 30px;
-  background: linear-gradient(90deg, #1e90ff, #00bfff, #1c5edd);
-  background-size: 200% auto;
- -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
+  color: white; /* makes the text white */
   text-shadow: 2px 2px 15px rgba(0, 0, 0, 0.5);
-
-  animation: gradientMove 5s linear infinite;
   border-radius: 15px;
+  animation: fadeText 3s ease-in-out infinite alternate; /* soft glowing effect */
+}
+
+
+@keyframes fadeText {
+  from {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  }
+  to {
+    text-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+  }
 }
 
 @keyframes gradientMove {

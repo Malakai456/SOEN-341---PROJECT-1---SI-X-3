@@ -152,16 +152,16 @@ section {
   max-width: 900px;
   margin: 0 auto;
   padding: 30px;
-  text-align: center;
 
   
-  background: linear-gradient(90deg, #ffffff, #cce4ff, #ffffff, #a5d8ff);
+  background: linear-gradient(90deg, #ffffff, #66a3ff, #ffffff, #66a3ff);
   background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 
-  text-shadow: 0px 0px 25px rgba(255, 255, 255, 0.6);
-  animation: gradientMove 4s ease-in-out infinite;
+  text-shadow: 0px 0px 25px rgba(255, 255, 255, 0.4);
+
+  animation: gradientMove 4s linear infinite;
   border-radius: 15px;
 }
 
@@ -169,11 +169,8 @@ section {
   0% {
     background-position: 0% center;
   }
-  50% {
-    background-position: 100% center;
-  }
   100% {
-    background-position: 0% center;
+    background-position: 200% center;
   }
 }
 

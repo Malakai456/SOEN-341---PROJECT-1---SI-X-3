@@ -1,0 +1,272 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3307
+-- Generation Time: Oct 08, 2025 at 01:26 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `341_project`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categories`
+--
+
+CREATE TABLE `categories` (
+  `category_id` bigint(20) UNSIGNED NOT NULL,
+  `category_name` varchar(80) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `events`
+--
+
+CREATE TABLE `events` (
+  `event_id` bigint(20) UNSIGNED NOT NULL,
+  `org_id` bigint(20) UNSIGNED NOT NULL,
+  `location_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `title` varchar(200) NOT NULL,
+  `description` text DEFAULT NULL,
+  `starts_at` datetime NOT NULL,
+  `ends_at` datetime NOT NULL,
+  `capacity` int(10) UNSIGNED NOT NULL,
+  `ticket_policy` enum('free','paid_mock') NOT NULL DEFAULT 'free',
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `event_categories`
+--
+
+CREATE TABLE `event_categories` (
+  `event_id` bigint(20) UNSIGNED NOT NULL,
+  `category_id` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `locations`
+--
+
+CREATE TABLE `locations` (
+  `location_id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(150) NOT NULL,
+  `address` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `organizations`
+--
+
+CREATE TABLE `organizations` (
+  `org_id` bigint(20) UNSIGNED NOT NULL,
+  `org_name` varchar(150) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `saved_events`
+--
+
+CREATE TABLE `saved_events` (
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `event_id` bigint(20) UNSIGNED NOT NULL,
+  `saved_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `remind_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tickets`
+--
+
+CREATE TABLE `tickets` (
+  `ticket_id` bigint(20) UNSIGNED NOT NULL,
+  `event_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `qr_code_value` varchar(128) NOT NULL,
+  `issued_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `status` enum('issued','checked_in','cancelled') NOT NULL DEFAULT 'issued',
+  `checked_in_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password_hash` char(60) NOT NULL,
+  `first_name` varchar(80) NOT NULL,
+  `last_name` varchar(80) NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`category_id`),
+  ADD UNIQUE KEY `category_name` (`category_name`);
+
+--
+-- Indexes for table `events`
+--
+ALTER TABLE `events`
+  ADD PRIMARY KEY (`event_id`),
+  ADD KEY `org_id` (`org_id`),
+  ADD KEY `location_id` (`location_id`);
+
+--
+-- Indexes for table `event_categories`
+--
+ALTER TABLE `event_categories`
+  ADD PRIMARY KEY (`event_id`,`category_id`),
+  ADD KEY `category_id` (`category_id`);
+
+--
+-- Indexes for table `locations`
+--
+ALTER TABLE `locations`
+  ADD PRIMARY KEY (`location_id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `organizations`
+--
+ALTER TABLE `organizations`
+  ADD PRIMARY KEY (`org_id`),
+  ADD UNIQUE KEY `org_name` (`org_name`);
+
+--
+-- Indexes for table `saved_events`
+--
+ALTER TABLE `saved_events`
+  ADD PRIMARY KEY (`user_id`,`event_id`),
+  ADD KEY `event_id` (`event_id`);
+
+--
+-- Indexes for table `tickets`
+--
+ALTER TABLE `tickets`
+  ADD PRIMARY KEY (`ticket_id`),
+  ADD UNIQUE KEY `event_id` (`event_id`,`user_id`),
+  ADD UNIQUE KEY `qr_code_value` (`qr_code_value`),
+  ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `category_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `events`
+--
+ALTER TABLE `events`
+  MODIFY `event_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `locations`
+--
+ALTER TABLE `locations`
+  MODIFY `location_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `organizations`
+--
+ALTER TABLE `organizations`
+  MODIFY `org_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `tickets`
+--
+ALTER TABLE `tickets`
+  MODIFY `ticket_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `events`
+--
+ALTER TABLE `events`
+  ADD CONSTRAINT `events_ibfk_1` FOREIGN KEY (`org_id`) REFERENCES `organizations` (`org_id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `events_ibfk_2` FOREIGN KEY (`location_id`) REFERENCES `locations` (`location_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `event_categories`
+--
+ALTER TABLE `event_categories`
+  ADD CONSTRAINT `event_categories_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `event_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`category_id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `saved_events`
+--
+ALTER TABLE `saved_events`
+  ADD CONSTRAINT `saved_events_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `saved_events_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `tickets`
+--
+ALTER TABLE `tickets`
+  ADD CONSTRAINT `tickets_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`event_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `tickets_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

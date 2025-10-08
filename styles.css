@@ -152,29 +152,31 @@ section {
   max-width: 900px;
   margin: 0 auto;
   padding: 30px;
+  text-align: center;
 
   
-  background: linear-gradient(90deg, #ffffff, #d6e4ff, #ffffff);
-  background-size: 200% auto;
+  background: linear-gradient(90deg, #ffffff, #cce4ff, #ffffff, #a5d8ff);
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 
-
-  text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.3);
-
-  animation: gradientMove 5s linear infinite;
+  text-shadow: 0px 0px 25px rgba(255, 255, 255, 0.6);
+  animation: gradientMove 4s ease-in-out infinite;
   border-radius: 15px;
 }
-
 
 @keyframes gradientMove {
   0% {
     background-position: 0% center;
   }
+  50% {
+    background-position: 100% center;
+  }
   100% {
-    background-position: 200% center;
+    background-position: 0% center;
   }
 }
+
 
 .browse-events {
   padding: 40px 50px;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Your Ticket</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <!-- For qr code building-->>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    new QRCode(document.getElementById("qrcode"), {
+      text: "https://example.com/any/link-or-textfornow",
+      width: 256,
+      height: 256
+    });
+  });
+</script>
+</head>
+<body>
+  <header>
+    <h2 class="companyname"><a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
+  </header>
+
+  <main class="ticket-container" style="max-width:900px;margin:24px auto;padding:16px;">
+    <h1 id="thanks"></h1>
+
+    <section class="event-summary" style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+      <img id="eventImage" alt="Event image" style="max-width:320px;border-radius:8px;flex:0 0 auto;"/>
+      <div style="min-width:260px;">
+        <p><strong>Name:</strong> <span id="fullName"></span></p>
+        <p><strong>Event:</strong> <span id="eventName"></span></p>
+        <p><strong>Date:</strong> <span id="eventDate"></span></p>
+        <p><strong>Time:</strong> <span id="eventTime"></span></p>
+        <p><strong>Location:</strong> <span id="eventLocation"></span></p>
+        <p><strong>Price:</strong> $<span id="eventPrice"></span></p>
+        <p><strong>Ticket ID:</strong> <span id="ticketId"></span></p>
+      </div>
+    </section>
+
+    <hr style="margin:16px 0;"/>
+
+    <h2>Your QR Code (show this at the gate)</h2>
+    <div id="qrcode" style="width:256px;height:256px;"></div>
+
+    <p style="margin-top:12px;">
+      If the QR doesn't load, refresh. If staff needs to verify manually, they can open the link the QR encodes.
+    </p>
+  </main>
+</body>
+</html>

@@ -65,6 +65,29 @@ button:hover {
     background: #154bb5;
 }
 
+/*----------------Save Button ----------------*/
+.save-button{
+ background: linear-gradient(135deg, #1c5edd, #4a90e2);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 83%;
+    margin: 0px 55px 0px;
+
+}
+ 
+
+.save-button:hover {
+   background: linear-gradient(135deg, #ffdd57, #ffc107);
+    color: #1c1c1c;
+    transform: scale(1.05);
+}
+
 .register, .business {
     margin-top: 15px;
     font-size: 14px;
@@ -351,4 +374,44 @@ section {
 .mix {
     display: flex;
     flex-direction: column;
+}
+/*----------------Sucess save message box ----------------*/
+#messageBox {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background: #4caf50;
+  color: white;
+  padding: 14px 26px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  display: none;
+  opacity: 0;
+  z-index: 999999;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+}
+#calendar {
+  position:center;
+  text-align: center;
+  margin-top: 100px;
+  color:#f5f7fa;
+  font-size: 36px;
+  text-shadow: 2px 2px 15px rgba(0,0,0,0.8);
+}
+
+.connect-google {
+  background: #34a853;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.connect-google:hover {
+  background: #2c8c47;
 }

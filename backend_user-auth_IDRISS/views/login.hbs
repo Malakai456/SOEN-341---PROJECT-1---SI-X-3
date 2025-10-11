@@ -1,53 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="styles.css">
     <title>Login Page</title>
 </head>
-<body>      
-<header>
 
-<h2 class="logo">
-  <!-- <img src="CU-logo-design-vector-Graphics-18354798-1.jpg" alt="CampusConnect Logo"> -->
-</h2>
+<body>
+    <header>
 
-<h2 class = "companyname"><a href="mainpage.hbs" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
+        <h2 class="logo">
+            <!-- <img src="CU-logo-design-vector-Graphics-18354798-1.jpg" alt="CampusConnect Logo"> -->
+        </h2>
 
-   <nav class = "navigation">
-        <a href="/"> Home</a>
-        <a href="/contact"> Contact</a>
-        <a href="/register" class="signInButton">Register</a>
-        <a href="/login" class="loginbutton">Log In</a>
-   </nav>
-</header>    
-<div class="homepage">
-    <form id="loginForm">
-    <h1>Login</h1>
+        <h2 class="companyname"><a href="/mainpage" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
 
-    <div class="input-text">
-        <input type="text" id="username" name="username" placeholder="Username" required> 
-        </div>
+        <nav class="navigation">
+            <a href="/"> Home</a>
+            <a href="/contact"> Contact</a>
+            <a href="/register" class="signInButton">Register</a>
+            <a href="/login" class="loginbutton">Log In</a>
+        </nav>
+    </header>
+    <div class="homepage">
+        {{#if message}}
+        <p class="error-message">{{message}}</p>
+        {{/if}}
 
-        <div class="input-text">
-        <input type="password" id="password" placeholder="Password" required>
-       </div>
-       <button type="button" onclick="">Login</button>
+        <form id="loginForm" action="/login" method="POST">
+            <h1>Login</h1>
 
-    <div class="register">
-        <p>Don't have an account? <a href="./register.hbs"> Register here!</a></p>
+            <div class="input-text">
+                <input type="email" id="email" name="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-text">
+                <input type="password" id="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit">Login</button>
+
+            <div class="register">
+                <p>Don't have an account? <a href="/register"> Register here!</a></p>
+            </div>
+
+            <div class="business">
+                <p>Business administrator? <a href="">Click here!</a> </p>
+            </div>
+
+        </form>
+
+
     </div>
-
-    <div class="business">
-        <p>Business administrator? <a href ="">Click here!</a> </p>
-    </div>
-
-
-    </form>
-    
-</div>
-<!-- <script src="scripts.js"></script> Link to external JavaScript file -->
+    <!-- <script src="scripts.js"></script> Link to external JavaScript file -->
 </body>
 
 

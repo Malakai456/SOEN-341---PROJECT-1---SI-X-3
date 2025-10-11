@@ -34,6 +34,12 @@ body {
     color: #1c5edd;
 }
 
+.registerpage h1 {
+    margin-bottom: 20px;
+    font-size: 32px;
+    color: #1c5edd;
+}
+
 .input-text input {
     width: 100%;
     padding: 12px;

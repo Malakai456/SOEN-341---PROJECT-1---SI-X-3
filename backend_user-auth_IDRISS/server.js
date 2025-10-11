@@ -15,7 +15,7 @@ const app = express();
 
 
 
-const publicDirectory = path.join(__dirname,'./public');
+const publicDirectory = path.join(__dirname,'public');
 app.use(express.static(publicDirectory));
 
 //Parse URL-encoded bodies (as sent by HTML forms)
@@ -30,6 +30,7 @@ app.set('view engine', 'hbs');
 const DB = mysql.createConnection({
     host: process.env.DATABASE_HOST,
     user: process.env.DATABASE_USER,
+    port: process.env.DATABASE_PORT,
     password: process.env.DATABASE_PASSWORD || "",
     database: process.env.DATABASE_NAME 
 });

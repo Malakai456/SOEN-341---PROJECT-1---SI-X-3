@@ -10,12 +10,12 @@
 
 <header>
     <h2 class="logo"></h2>
-    <h2 class = "companyname"><a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
+    <h2 class = "companyname"><a href="mainpage.hbs" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
     <nav class="navigation">
-        <a href="mainpage.html">Home</a>
-        <a href="contact.html">Contact</a>
-        <a href="register.html" class="signInButton">Sign In</a>
-        <a href="login.html" class="loginbutton">Log In</a>
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/register" class="signInButton">Register</a>
+        <a href="/login" class="loginbutton">Log In</a>
     </nav>
 </header>
 
@@ -39,15 +39,15 @@
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 <script>
 const events = [
-    { title:"Hackathon 2025", date:"2025-12-15", time : "8 am ",location:"Engineering Club", price:10, image:"hackathon.png", details:"24-hour coding challenge!" },
-    { title:"Karaoke Night", date:"2025-02-21", time : "6 pm ",location:"Business Club", price:5, image:"karaoke.png", details:"Sing your heart out" },
-    { title:"Arts and Crafts", date:"2025-03-25", time :"5 pm ",location:"Arts Club", price:8, image:"artsandcrafts.png", details:"Explore arts and painting ." },
-    { title:"Chess Night", date:"2025-04-02", time : "7 pm" ,location:"Finance Club", price:7, image:"chess.png", details:"Chess tournament 1V1" },
-    { title:"Movie Night", date:"2025-01-10", time : "8 pm" ,location:"Cinema Club", price:6, image:"movie.png", details:"Watch latest movies together." },
-    { title:"Cooking Workshop", date:"2025-02-28", time : "4 pm" ,location:"Culinary Club", price:12, image:"cooking.png", details:"Learn some delicious recipes." },
-    { title:"Dance Battle", date:"2025-03-15", time : "6 pm" , location:"Dance Club", price:8, image:"dance.png", details:"Show your moves." },
-    { title:"Gaming Tournament", date:"2025-05-05", time : "5 pm" ,location:"Gaming Club", price:10, image:"gaming.png", details:"Compete in esports." },
-    { title:"Book Club Meetup", date:"2025-06-12", time : "11 am" , location:"Library", price:5, image:"book.png", details:"Discuss latest books." }
+    { title:"Hackathon 2025", date:"2025-12-15", time : "8 am ",location:"Engineering Club", price:10, image:"/images/hackathon.png", details:"24-hour coding challenge!" },
+    { title:"Karaoke Night", date:"2025-02-21", time : "6 pm ",location:"Business Club", price:5, image:"/images/karaoke.png", details:"Sing your heart out" },
+    { title:"Arts and Crafts", date:"2025-03-25", time :"5 pm ",location:"Arts Club", price:8, image:"/images/artsandcrafts.png", details:"Explore arts and painting ." },
+    { title:"Chess Night", date:"2025-04-02", time : "7 pm" ,location:"Finance Club", price:7, image:"/images/chess.png", details:"Chess tournament 1V1" },
+    { title:"Movie Night", date:"2025-01-10", time : "8 pm" ,location:"Cinema Club", price:6, image:"/images/movie.png", details:"Watch latest movies together." },
+    { title:"Cooking Workshop", date:"2025-02-28", time : "4 pm" ,location:"Culinary Club", price:12, image:"/images/cooking.png", details:"Learn some delicious recipes." },
+    { title:"Dance Battle", date:"2025-03-15", time : "6 pm" , location:"Dance Club", price:8, image:"/images/dance.png", details:"Show your moves." },
+    { title:"Gaming Tournament", date:"2025-05-05", time : "5 pm" ,location:"Gaming Club", price:10, image:"/images/gaming.png", details:"Compete in esports." },
+    { title:"Book Club Meetup", date:"2025-06-12", time : "11 am" , location:"Library", price:5, image:"images/book.png", details:"Discuss latest books." }
 ];
 
 const eventGrid = document.getElementById('eventGrid');

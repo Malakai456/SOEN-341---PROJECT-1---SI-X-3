@@ -3,36 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us</title>
-
+  <title>Contact Us - CampusEvents</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, Helvetica, sans-serif;
-    }
-
+    /* ------------ Contact Page Styles ------------ */
     body {
       background: linear-gradient(135deg, #1c5edd, #4a90e2);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
+      margin: 0;
+    }
+
+    header {
+      width: 100%;
+      background: #224d9c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+      padding: 0 40px;
+      color: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 10;
+    }
+
+    .companyname {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .navigation {
+      display: flex;
+      gap: 25px;
+    }
+
+    .navigation a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .navigation a:hover {
+      color: #ffdd57;
     }
 
     .contact-container {
       background: #fff;
       padding: 40px;
       border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
       width: 450px;
       text-align: center;
+      margin-top: 140px; /* offset for fixed header */
     }
 
     h1 {
       color: #1c5edd;
       margin-bottom: 20px;
+      font-size: 28px;
     }
 
     label {
@@ -95,6 +130,16 @@
 </head>
 
 <body>
+  <header>
+    <h2 class="companyname">CampusEvents</h2>
+    <nav class="navigation">
+      <a href="mainpage.html">Home</a>
+      <a href="contact.html">Contact</a>
+      <a href="register.html">Sign In</a>
+      <a href="login.html" class="loginbutton">Log In</a>
+    </nav>
+  </header>
+
   <div class="contact-container">
     <h1>Contact Us</h1>
     <form id="contactForm">
@@ -116,14 +161,10 @@
   <script>
     document.getElementById("contactForm").addEventListener("submit", function(event) {
       event.preventDefault();
-
       const msg = document.getElementById("successMessage");
       msg.style.display = "block";
       this.reset();
-
-      setTimeout(() => {
-        msg.style.display = "none";
-      }, 3000);
+      setTimeout(() => msg.style.display = "none", 3000);
     });
   </script>
 </body>

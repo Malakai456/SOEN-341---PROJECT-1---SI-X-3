@@ -68,6 +68,22 @@ CREATE TABLE `event_categories` (
 -- Table structure for table `locations`
 --
 
+CREATE TABLE `contact_messages` (
+  `message_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(100) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `subject` VARCHAR(150) NOT NULL,
+  `message` TEXT NOT NULL,
+  `submitted_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`message_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contact_messages`
+--
+
 CREATE TABLE `locations` (
   `location_id` bigint(20) UNSIGNED NOT NULL,
   `name` varchar(150) NOT NULL,

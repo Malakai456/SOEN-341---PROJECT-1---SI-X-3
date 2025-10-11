@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <title>Admin Registering Page</title>
+</head>
+
+<body>
+    <header>
+
+        <h2 class="companyname">
+            <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+        </h2>
+
+        <nav class="navigation">
+            <a href="mainpage.html">Home</a>
+            <a href="contact.html">Contact</a>
+            <a href="adminregister.html" class="signInButton">Sign In</a>
+            <a href="adminlogin.html" class="loginbutton">Log In</a>
+        </nav>
+    </header>
+<div class = eventTextBox>
+   <h1 class = "eventText" > Do you want to organize an event ? Sign up as soon as possible ! </h1>
+</div>
+
+    <div class="registerpageEventOrg">
+        <form id="adminRegisterForm">
+            <h1>Event Organizer Registration</h1>
+
+            <div class="input-text">
+                <input type="text" id="firstname" placeholder="First Name" required>
+            </div>
+
+            <div class="input-text">
+                <input type="text" id="lastname" placeholder="Last Name" required>
+            </div>
+
+            <div class="input-text">
+                <input type="text" id="username" placeholder="Username" required>
+            </div>
+
+            <div class="input-text">
+                <input type="phone" id="phone" placeholder="Phone Number" required>
+            </div>
+
+            <div class="input-text">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+
+            <div class="input-text">
+                <input type="text" id="address" placeholder="Address" required>
+            </div>
+
+            <div class="input-text">
+                <input type="password" id="password" placeholder="Password" required>
+            </div>
+
+            <br>
+            <button type="button" onclick="">Register as an Event Organizer</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -4,7 +4,7 @@ import mysql from "mysql2/promise";
 import { google } from "googleapis";
 import path from "path";
 import { fileURLToPath } from "url";
-import crypto from "crypto";
+import * as crypto from "crypto";
 
 dotenv.config();
 

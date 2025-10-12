@@ -2,19 +2,19 @@
 const nodemailer = require ('nodemailer');
 
 const transporter = nodemailer.createTransport ( {
-    service: "hotmail",
+    service: "gmail",
     auth: {
-        user:"event@hotmail.com", // need to create a real mail acccount
-        pass:"" //need the real authentification of the mail account
+        user:"DoNotReplyEvents341@gmail.com",
+        pass:"Soen341!"
     }
 
 
 });
 
-
+export function sendConfirmationEmail(to, title, date, location) {
 const things = {
-    from: "event@hotmail.com" ,
-    to: "", // to who you wanna seend it to
+    from: "DoNotReplyEvents341@gmail.com" ,//same as user
+    to: "DoNotReplyEvents341@gmail.com",
     subject:"Try sending mail",
     text: "It is done!"
 
@@ -27,6 +27,6 @@ transporter.sendMail(things,  (err, info)=> {
 
     }
     console.log("sent: " + info.response);
-
-
 });
+
+}

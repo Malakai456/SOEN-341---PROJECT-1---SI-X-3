@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import { google } from "googleapis";
 import path from "path";
 import { fileURLToPath } from "url";
+import { sendConfirmationEmail } from "sendingmails.js";
 
 dotenv.config();
 
@@ -62,7 +63,7 @@ app.get("/auth/google/callback", async (req, res) => {
 // Add event to Google Calendar when user buys
 app.post("/api/buy", async (req, res) => {
   try {
-    const { title, description, starts_at, ends_at, location } = req.body;
+    const { title, description, starts_at, ends_at, location, email} = req.body;
 
     // Get user’s saved tokens
     const [users] = await db.query(
@@ -89,6 +90,11 @@ app.post("/api/buy", async (req, res) => {
     };
 
     await calendar.events.insert({ calendarId: "primary", resource: event });
+
+    if (email) {
+      await sendConfirmationEmail(email, title, starts_at, location);
+    }
+
     res.json({ message: "Event added successfully" });
   } catch (err) {
     console.error("Error adding event:", err);

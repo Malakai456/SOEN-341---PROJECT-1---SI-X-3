@@ -227,6 +227,40 @@ app.get("/ticket/verify", async (req, res) => {
   }
 });
 
+// 📨 CONTACT FORM ROUTE
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: "Please fill out all fields.",
+      });
+    }
+
+    console.log("📩 New contact submission:", { name, email, subject, message });
+
+    // Save message to database
+    await db.query(
+      "INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)",
+      [name, email, subject, message]
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Message saved successfully!",
+    });
+  } catch (error) {
+    console.error("❌ Error saving contact form:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+});
+
+
 // --- Start server ---
 app.listen(3000, () =>
   console.log("Server running at http://localhost:3000")

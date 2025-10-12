@@ -4,6 +4,7 @@ import mysql from "mysql2/promise";
 import { google } from "googleapis";
 import path from "path";
 import { fileURLToPath } from "url";
+import crypto from "crypto";
 
 dotenv.config();
 
@@ -93,6 +94,136 @@ app.post("/api/buy", async (req, res) => {
   } catch (err) {
     console.error("Error adding event:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Create a ticket: server mints secure token, saves row, returns details for QR
+app.post("/api/purchase", async (req, res) => {
+  try {
+    const {
+      userId,                // required
+      eventId,               // optional; we can resolve if not provided
+      eventName, eventDate,  // optional (used to resolve eventId)
+      eventTime, eventLocation, eventPrice, eventImage
+    } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ error: "Missing userId" });
+    }
+
+    // If client didn't send eventId, find by title & DATE(starts_at)
+    let resolvedEventId = eventId;
+    if (!resolvedEventId && eventName && eventDate) {
+      const [ev] = await db.query(
+        "SELECT event_id FROM events WHERE title = ? AND DATE(starts_at) = ? LIMIT 1",
+        [eventName, eventDate]
+      );
+      if (ev.length) resolvedEventId = ev[0].event_id;
+    }
+
+    // Create minimal event row ifnotfound so we can issue the ticket
+    if (!resolvedEventId) {
+      const starts = eventDate ? `${eventDate} 00:00:00` : new Date().toISOString().slice(0,19).replace('T',' ');
+      const ends   = eventDate ? `${eventDate} 23:59:59` : starts;
+      const [insEv] = await db.query(
+        "INSERT INTO events (title, description, starts_at, ends_at, capacity, ticket_policy) VALUES (?, ?, ?, ?, ?, 'free')",
+        [eventName || 'Untitled', eventLocation || null, starts, ends, 999]
+      );
+      resolvedEventId = insEv.insertId;
+    }
+
+    // Enforce 1 ticket per user/event 
+    const [existing] = await db.query(
+      "SELECT ticket_id, qr_code_value FROM tickets WHERE user_id=? AND event_id=? LIMIT 1",
+      [userId, resolvedEventId]
+    );
+    if (existing.length) {
+      const token = existing[0].qr_code_value;
+      const ticketUrl = `${req.protocol}://${req.get("host")}/ticket/verify?token=${encodeURIComponent(token)}`;
+      return res.json({
+        ticketId: existing[0].ticket_id,
+        token,
+        ticketUrl,
+        eventId: resolvedEventId,
+        eventName, eventDate, eventTime, eventLocation, eventPrice, eventImage
+      });
+    }
+
+    // Secure token for QR (server)
+    const token = crypto.randomUUID?.() || crypto.randomBytes(16).toString("hex");
+
+    // Insert the ticket row
+    const [ins] = await db.query(
+      "INSERT INTO tickets (event_id, user_id, qr_code_value, status) VALUES (?, ?, ?, 'issued')",
+      [resolvedEventId, userId, token]
+    );
+
+    const ticketId = ins.insertId;
+    const ticketUrl = `${req.protocol}://${req.get("host")}/ticket/verify?token=${encodeURIComponent(token)}`;
+
+    // Return everything the front-end needs
+    return res.json({
+      ticketId,
+      token,
+      ticketUrl,
+      eventId: resolvedEventId,
+      eventName, eventDate, eventTime, eventLocation, eventPrice, eventImage
+    });
+  } catch (err) {
+    console.error("purchase error:", err);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Verify page (non-static html way): checks DB by token, shows Approved/Invalid
+app.get("/ticket/verify", async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).send("Missing token");
+
+    const [rows] = await db.query(
+      `SELECT t.ticket_id, t.status, u.first_name, u.last_name,
+              e.title AS event_name, e.starts_at
+       FROM tickets t
+       JOIN users  u ON u.user_id = t.user_id
+       JOIN events e ON e.event_id = t.event_id
+       WHERE t.qr_code_value = ?
+       LIMIT 1`,
+      [token]
+    );
+
+    if (!rows.length) {
+      return res.status(404).send(`<!doctype html><html><body style="font-family:Arial">
+        <main style="max-width:860px;margin:28px auto">
+          <h1>Invalid Ticket!</h1>
+          <p>Token not found.</p>
+        </main></body></html>`);
+    }
+
+    const t = rows[0];
+    if (t.status !== "issued") {
+      return res.status(400).send(`<!doctype html><html><body style="font-family:Arial">
+        <main style="max-width:860px;margin:28px auto">
+          <h1>Oh No, Ticket Not Valid...</h1>
+          <p>Status: ${t.status}</p>
+        </main></body></html>`);
+    }
+
+    const start = t.starts_at instanceof Date
+      ? t.starts_at.toISOString().replace('T',' ').slice(0,16)
+      : (t.starts_at || '');
+
+    return res.send(`<!doctype html><html><body style="font-family:Arial">
+      <main style="max-width:860px;margin:28px auto">
+        <h1>Yay, Ticket Approved!</h1>
+        <p><strong>Holder:</strong> ${t.first_name || ''} ${t.last_name || ''}</p>
+        <p><strong>Ticket ID:</strong> ${t.ticket_id}</p>
+        <p><strong>Event:</strong> ${t.event_name}</p>
+        <p><strong>Starts at:</strong> ${start}</p>
+      </main></body></html>`);
+  } catch (err) {
+    console.error("verify error:", err);
+    return res.status(500).send("Server error");
   }
 });
 

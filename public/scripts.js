@@ -1,31 +1,161 @@
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const data = {
-    firstname: document.getElementById('firstname').value.trim(),
-    lastname: document.getElementById('lastname').value.trim(),
-    username: document.getElementById('username').value.trim(),
-    password: document.getElementById('password').value.trim(),
-    phone: document.getElementById('phone').value.trim(),
-    email: document.getElementById('email').value.trim(),
-    address: document.getElementById('address').value.trim()
+  const body = {
+    firstname: document.getElementById('firstname').value,
+    lastname:  document.getElementById('lastname').value,
+    username:  document.getElementById('username').value,
+    phone:     document.getElementById('phone').value,
+    email:     document.getElementById('email').value,
+    address:   document.getElementById('address').value,
+    password:  document.getElementById('password').value,
   };
 
   try {
-    const res = await fetch('/register', {
+    const res = await fetch('/api/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
     });
 
-    const msg = await res.text();
-    if (res.ok) {
-      alert('✅ ' + msg);
-      document.getElementById('registerForm').reset();
-    } else {
-      alert('❌ ' + msg);
+    if (!res.ok) {
+      const t = await res.text();
+      alert('Register failed: ' + t);
+      return;
     }
+    alert('Account created!');
+    // window.location.href = '/login.html';
   } catch (err) {
-    alert('⚠️ Network error: ' + err.message);
+    alert('Network error: ' + err.message);
   }
 });
+
+    const first_name = document.getElementById('firstname').value.trim();
+    const last_name = document.getElementById('lastname').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    const newClient = { first_name, last_name, username, password, phone, email, address };
+
+try{
+        
+        const response = await fetch('http://localhost:5000/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newClient),
+        });
+
+        if (response.ok) {
+            alert('Registration successful!');
+            window.location.href = './HomePage.html';
+        } else {
+            const error = await response.text();
+            alert('Error: ' + error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to register. Please try again later.');
+    }
+
+
+
+
+async function loginUser() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('http://localhost:5000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+           localStorage.setItem('currentUser', JSON.stringify(user));
+           alert('Login successful!');
+          
+            window.location.href = './ClientDash.html';
+        } else {
+            const error = await response.text();
+            alert('Login failed: ' + error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to login. Please try again later.');
+    }
+}
+
+
+function getLoggedUser() {
+  return JSON.parse(localStorage.getItem("loggedUser") || "null");
+}
+
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector(".username-display");
+  const logoutBtn = document.querySelector(".logout-btn");
+
+  if (user) {
+    if (display) display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+  } else {
+    if (display) display.textContent = "";
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem("loggedUser");
+  alert("Logged out!");
+  window.location.href = "login.html";
+}
+
+function getLoggedUser() {
+  return JSON.parse(localStorage.getItem("loggedUser") || "null"); // { user_id, username } or null
+}
+
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector(".username-display");
+  const logoutBtn = document.querySelector(".logout-btn");
+
+  if (user) {
+    if (display) display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+  } else {
+    if (display) display.textContent = "";
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem("loggedUser");
+  alert("Logged out!");
+  window.location.href = "login.html";
+}
+
+function getLoggedUser() {
+  return JSON.parse(localStorage.getItem("loggedUser") || "null");
+}
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector(".username-display");
+  const logoutBtn = document.querySelector(".logout-btn");
+  if (user) {
+    if (display) display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+  } else {
+    if (display) display.textContent = "";
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
+}
+function logoutUser() {
+  localStorage.removeItem("loggedUser");
+  alert("Logged out!");
+  window.location.href = "login.html";
+}

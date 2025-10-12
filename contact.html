@@ -23,24 +23,65 @@
       <div class="input-text">
         <input type="text" id="name" placeholder="Full Name" required>
       </div>
+
       <div class="input-text">
         <input type="email" id="email" placeholder="Email" required>
       </div>
+
+      <div class="input-text">
+        <input type="text" id="subject" placeholder="Subject" required>
+      </div>
+
       <div class="input-text">
         <textarea id="message" rows="5" placeholder="Message" style="width:100%; border:2px solid #ddd; border-radius:10px; padding:12px; font-size:16px; resize:none;" required></textarea>
       </div>
+
       <button type="submit">Send Message</button>
       <p id="successMessage" style="display:none; color:green; font-weight:bold; margin-top:15px;">✅ Your message was sent!</p>
+      <p id="errorMessage" style="display:none; color:red; font-weight:bold; margin-top:15px;">❌ Something went wrong. Please try again.</p>
     </form>
   </div>
 
+  <!--  Script that connects to backend -->
   <script>
-    document.getElementById("contactForm").addEventListener("submit", function(e) {
+    document.getElementById("contactForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const msg = document.getElementById("successMessage");
-      msg.style.display = "block";
-      this.reset();
-      setTimeout(() => msg.style.display = "none", 3000);
+
+      const formData = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        subject: document.getElementById("subject").value,
+        message: document.getElementById("message").value,
+      };
+
+      const successMsg = document.getElementById("successMessage");
+      const errorMsg = document.getElementById("errorMessage");
+
+      try {
+        const response = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          successMsg.style.display = "block";
+          errorMsg.style.display = "none";
+          document.getElementById("contactForm").reset();
+          setTimeout(() => (successMsg.style.display = "none"), 3000);
+        } else {
+          successMsg.style.display = "none";
+          errorMsg.style.display = "block";
+          setTimeout(() => (errorMsg.style.display = "none"), 3000);
+        }
+      } catch (error) {
+        console.error("❌ Error sending message:", error);
+        successMsg.style.display = "none";
+        errorMsg.style.display = "block";
+        setTimeout(() => (errorMsg.style.display = "none"), 3000);
+      }
     });
   </script>
 </body>

@@ -1,15 +1,68 @@
-import dotenv from "dotenv";
-import express from "express";
-import mysql from "mysql2/promise";
-import { google } from "googleapis";
-import path from "path";
-import { fileURLToPath } from "url";
-import crypto from "crypto";
+// import dotenv from "dotenv";
+// import express from "express";
+// import mysql from "mysql2/promise";
+// import { google } from "googleapis";
+// import path from "path";
+// import { fileURLToPath } from "url";
+// import crypto from "crypto";
 
-dotenv.config();
+// dotenv.config();
 
+// const app = express();
+// app.use(express.json());
+
+const mysql =require('mysql');
+const express = require('express'); 
+
+const cors = require('cors');
 const app = express();
+
+const PORT = 5000;
+app.use(cors());
 app.use(express.json());
+app.get("/", (req, res) => res.send("Server is running!"));
+
+// Register
+app.post("/register", async (req, res) => {
+  const { first_name, last_name, username, password, phone, email, address } = req.body;
+  try {
+    await db.query(
+      `INSERT INTO users (first_name, last_name, username, password, phone, email, address) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [first_name, last_name, username, password, phone, email, address]
+    );
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error registering user" });
+  }
+});
+
+// Login
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const [results] = await db.query(
+      "SELECT * FROM users WHERE username = ? AND password = ?",
+      [username, password]
+    );
+    if (results.length === 0) return res.status(401).json({ message: "Invalid username or password" });
+
+    const user = results[0];
+    res.status(200).json({
+      user_id: user.user_id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error logging in" });
+  }
+});
+
 
 // Get directory path for static files (like events.html)
 const __filename = fileURLToPath(import.meta.url);
@@ -21,7 +74,7 @@ const db = await mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "",
-  database: "341_project_SARAH",
+  database: "341_project_sara",
 });
 
 // --- Google OAuth2 setup ---

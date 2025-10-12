@@ -16,6 +16,8 @@
         <a href="contact.html">Contact</a>
         <a href="register.html" class="signInButton">Sign In</a>
         <a href="login.html" class="loginbutton">Log In</a>
+        <a href="/auth/google" class="connect-google">Connect Google Calendar</a>
+
     </nav>
 </header>
 
@@ -32,6 +34,7 @@
     <select id="filterValue">
     </select>
 </div>
+<div id="messageBox"></div>
 
 <div class="event-grid" id="eventGrid">
 </div>
@@ -67,6 +70,7 @@ events.forEach(event => {
         <div class="event-footer">
             <span class="price">$${event.price}</span>
             <button class="buy-button">Buy</button>
+            <!-- <button class="save-button" onclick="saveEvent('${event.title}', '${event.date}', '${event.location}')">Save</button> -->
         </div>
     `;
 
@@ -103,4 +107,76 @@ filterType.addEventListener('change', updateFilterOptions);
 filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
 
 updateFilterOptions();
+// Show confirmation save message
+function showMessage(text, color) {
+  const box = document.getElementById("messageBox");
+  box.textContent = text;
+  box.style.background = color;
+  box.style.display = "block";
+  
+  // fade + slide in
+  setTimeout(() => {
+    box.style.opacity = "1";
+    box.style.transform = "translateY(0)";
+  }, 10);
+
+  // fade out after 2 seconds
+  setTimeout(() => {
+    box.style.opacity = "0";
+    box.style.transform = "translateY(20px)";
+    setTimeout(() => (box.style.display = "none"), 500);
+  }, 2000);
+}
+
+/*
+// Save event function
+function saveEvent(title, date, location) {
+    //add a "if logged event saved" and "if not logged in, send the login page"
+    console.log("saveEvent called:", title);
+  let savedEvents = JSON.parse(localStorage.getItem('savedEvents')) || [];
+  const exists = savedEvents.some(event => event.title === title && event.date === date);
+
+  if (!exists) {
+    savedEvents.push({ title, date, location });
+    localStorage.setItem('savedEvents', JSON.stringify(savedEvents));
+    showMessage("Event successfully added!", "#4caf50");
+  } else {
+    showMessage("Event already saved.", "#f1c40f");
+  }
+} */
+
+async function buyEvent(title, date, location, description) {
+  try {
+    const response = await fetch("/api/buy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        description,
+        location,
+        starts_at: `${date}T09:00:00-05:00`,
+        ends_at: `${date}T11:00:00-05:00`
+      })
+    });
+
+    const result = await response.json();
+    const color = response.ok ? "#4caf50" : "#f44336";
+    const message = response.ok
+      ? "Event added to Google Calendar!"
+      : `Error: ${result.message}`;
+
+    showMessage(message, color);
+  } catch (err) {
+    console.error("buyEvent error:", err);
+    showMessage("Failed to connect to server.", "#f44336");
+  }
+}
+
+// Check if Google account connected
+if (location.search.includes("connected=true")) {
+  showMessage("Google Account connected!", "#4caf50");
+  history.replaceState({}, document.title, location.pathname);
+}
 </script>
+</body>
+</html>

@@ -60,29 +60,45 @@ async function loginUser() {
     }
 }
 
-function buyEvent(title, location, price) {
-    const confirmPurchase = confirm(`Buy ticket for "${title}"?`);
+// function buyEvent(title, location, price) {
+//     const confirmPurchase = confirm(`Buy ticket for "${title}"?`);
+//     if (!confirmPurchase) return;
+
+//     // Send to server
+//     fetch('http://localhost:5000/buyEvent', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({
+//             title: title,
+//                location: location,
+//             price: parseInt(price, 10)
+         
+//         })
+//     })
+//     console.log(price)
+//     .then(res => res.json())
+//     .then(data => {
+//         console.log('Server response:', data);
+//         alert(data.message);
+//     })
+//     .catch(err => {
+//         console.error('Error sending event to server:', err);
+//         alert('Failed to save event.');
+//     });
+// }
+function buyEvent(title, details, location, date, time, price) {
+    const confirmPurchase = confirm(`Are you sure you want a ticket for "${title}"?`);
     if (!confirmPurchase) return;
 
-    // Send to server
-    fetch('http://localhost:5000/buyEvent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            title: title,
-               location: location,
-            price: parseInt(price, 10)
-         
-        })
-    })
-    console.log(price)
-    .then(res => res.json())
-    .then(data => {
-        console.log('Server response:', data);
-        alert(data.message);
-    })
-    .catch(err => {
-        console.error('Error sending event to server:', err);
-        alert('Failed to save event.');
-    });
+    // Load calendar from localStorage
+    let calendar = JSON.parse(localStorage.getItem('userCalendar')) || [];
+
+    // Add new event
+    calendar.push({ title, details, location, date, time, price });
+
+    // Save back
+    localStorage.setItem('userCalendar', JSON.stringify(calendar));
+
+    alert(`Ticket for "${title}" added to your personal calendar!`);
 }
+

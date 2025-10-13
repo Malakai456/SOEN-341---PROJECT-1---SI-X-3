@@ -69,8 +69,14 @@ events.forEach(event => {
         <p>${event.details || ''}</p>
         <div class="event-footer">
             <span class="price">$${event.price}</span>
-<button class="buy-button" onclick="buyEvent('${event.title}', '${event.location}', ${event.price})">Buy</button>
-        </div>
+<button class="buy-button" onclick="buyEvent(
+    '${event.title}', 
+    '${event.details}', 
+    '${event.location}', 
+    '${event.date}', 
+    '${event.time}', 
+    ${event.price}
+)">Buy</button>        </div>
     `;
 
     eventGrid.appendChild(card);

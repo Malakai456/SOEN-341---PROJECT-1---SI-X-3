@@ -78,3 +78,16 @@ app.post('/login', (req, res) => {
         });
     });
 });
+app.post('/buyEvent', (req, res) => {
+    const { title, price, location } = req.body;
+   console.log(price);
+
+    const query = `INSERT INTO user_events (title, price, location) VALUES (?, ?, ?)`;
+    db.query(query, [title, price, location], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: 'Failed to save event' });
+        }
+        res.status(201).json({ message: 'Event successfully saved!' });
+    });
+});

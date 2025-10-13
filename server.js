@@ -2,7 +2,7 @@
 import express from "express";
 import mysql from "mysql2/promise";
 import cors from "cors";
-import crypto from "crypto";
+import * as crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -66,7 +66,7 @@ app.post("/api/purchase", async (req, res) => {
       resolvedEventId = insEv.insertId;
     }
 
-    // One ticket per user/event
+    // Enforce 1 ticket per user/event 
     const [existing] = await db.query(
       "SELECT ticket_id, qr_code_value FROM tickets WHERE user_id=? AND event_id=? LIMIT 1",
       [userId, resolvedEventId]
@@ -136,23 +136,37 @@ app.get("/ticket/verify", async (req, res) => {
     );
 
     if (!rows.length) {
-      return res.status(404).send(`<h1>Invalid Ticket!</h1>`);
+      return res.status(404).send(`<!doctype html><html><body style="font-family:Arial">
+        <main style="max-width:860px;margin:28px auto">
+          <h1>Invalid Ticket!</h1>
+          <p>Token not found.</p>
+        </main></body></html>`);
     }
 
     const t = rows[0];
     if (t.status !== "issued") {
-      return res.status(400).send(`<h1>Ticket Not Valid</h1>`);
+      return res.status(400).send(`<!doctype html><html><body style="font-family:Arial">
+        <main style="max-width:860px;margin:28px auto">
+          <h1>Oh No, Ticket Not Valid...</h1>
+          <p>Status: ${t.status}</p>
+        </main></body></html>`);
     }
 
-    res.send(`
-      <h1>Ticket Approved</h1>
-      <p><strong>Holder:</strong> ${t.first_name} ${t.last_name}</p>
-      <p><strong>Event:</strong> ${t.event_name}</p>
-      <p><strong>Starts at:</strong> ${t.starts_at}</p>
-    `);
+    const start = t.starts_at instanceof Date
+      ? t.starts_at.toISOString().replace('T',' ').slice(0,16)
+      : (t.starts_at || '');
+      
+    return res.send(`<!doctype html><html><body style="font-family:Arial">
+      <main style="max-width:860px;margin:28px auto">
+        <h1>Yay, Ticket Approved!</h1>
+        <p><strong>Holder:</strong> ${t.first_name || ''} ${t.last_name || ''}</p>
+        <p><strong>Ticket ID:</strong> ${t.ticket_id}</p>
+        <p><strong>Event:</strong> ${t.event_name}</p>
+        <p><strong>Starts at:</strong> ${start}</p>
+      </main></body></html>`);
   } catch (err) {
     console.error("verify error:", err);
-    res.status(500).send("Server error");
+    return res.status(500).send("Server error");
   }
 });
 

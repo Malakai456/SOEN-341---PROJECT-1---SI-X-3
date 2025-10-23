@@ -88,3 +88,65 @@ function buyEvent(title, details, location, date, time, price) {
 
     window.location.href = '/ticket.html';
 }
+
+// ADDED LOGIN + REGISTER FOR EVENT ORGANIZER
+async function registerEventOrganizer() {
+    const first_name = document.getElementById('firstname').value.trim();
+    const last_name = document.getElementById('lastname').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    const newEventOrg = { first_name, last_name, username, password, phone, email, address };
+
+try{
+        
+        const response = await fetch('http://localhost:5000/registerEventOrg', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newEventOrg),
+        });
+
+        if (response.ok) {
+            alert('Registration successful!');
+            window.location.href = './loginOrganizer.html';
+        } else {
+            const error = await response.text();
+            alert('Error: ' + error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to register. Please try again later.');
+    }
+}
+
+
+async function loginEventOrganizer() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('http://localhost:5000/loginEventOrg', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (response.ok) {
+            const user = await response.json();
+           localStorage.setItem('currentUser', JSON.stringify(user));
+           alert('Login successful!');
+          
+            window.location.href = './create_events.html';
+        } else {
+            const error = await response.text();
+            alert('Login failed: ' + error);
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to login. Please try again later.');
+    }
+}
+

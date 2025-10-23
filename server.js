@@ -91,3 +91,46 @@ app.post('/buyEvent', (req, res) => {
         res.status(201).json({ message: 'Event successfully saved!' });
     });
 });
+
+//ADDED THESE ROUTES FOR LOGIN AND REGISTER EVENT ORG
+app.post('/registerEventOrg', (req, res) => {
+    const { first_name, last_name, username, phone, email, address, password } = req.body;
+    const query = `
+        INSERT INTO event_organizers (first_name, last_name, username, phone, email, address, password)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
+    db.query(query, [first_name, last_name, username, phone, email, address, password], (err, result) => {
+        if (err) {
+            console.error('Error inserting user into database:', err);
+            return res.status(500).send('Error registering Event Organizer');
+        }
+        res.status(201).send('Event Organizer registered successfully');
+    });
+});
+
+// Login user
+app.post('/loginEventOrg', (req, res) => {
+    const { username, password } = req.body;
+    const query = 'SELECT * FROM event_organizers WHERE username = ? AND password = ?';
+    db.query(query, [username, password], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error logging in.');
+        }
+        if (results.length === 0) {
+            return res.status(401).send('Invalid username or password.');
+        }
+
+        const user = results[0];
+        res.status(200).json({
+            user_id: user.user_id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            username: user.username,
+            email: user.email,
+            phone: user.phone,
+            address: user.address
+        });
+    });
+});
+

@@ -99,7 +99,7 @@ async function registerEventOrganizer() {
     const email = document.getElementById('email').value.trim();
     const address = document.getElementById('address').value.trim();
 
-    const newEventOrg = { first_name, last_name, username, password, phone, email, address };
+    const newEventOrg = { first_name, last_name, username, password, phone, email, address, user_role: 'event organizer' };
 
 try{
         

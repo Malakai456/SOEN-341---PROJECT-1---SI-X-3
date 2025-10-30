@@ -94,10 +94,10 @@ app.post('/buyEvent', (req, res) => {
 
 //ADDED THESE ROUTES FOR LOGIN AND REGISTER EVENT ORG
 app.post('/registerEventOrg', (req, res) => {
-    const { first_name, last_name, username, phone, email, address, password } = req.body;
+    const { first_name, last_name, username, phone, email, address, password, user_role } = req.body;
     const query = `
-        INSERT INTO event_organizers (first_name, last_name, username, phone, email, address, password)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (first_name, last_name, username, phone, email, address, password, user_role)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     db.query(query, [first_name, last_name, username, phone, email, address, password], (err, result) => {
         if (err) {
@@ -111,7 +111,7 @@ app.post('/registerEventOrg', (req, res) => {
 // Login user
 app.post('/loginEventOrg', (req, res) => {
     const { username, password } = req.body;
-    const query = 'SELECT * FROM event_organizers WHERE username = ? AND password = ?';
+    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
     db.query(query, [username, password], (err, results) => {
         if (err) {
             console.error(err);
@@ -129,7 +129,8 @@ app.post('/loginEventOrg', (req, res) => {
             username: user.username,
             email: user.email,
             phone: user.phone,
-            address: user.address
+            address: user.address,
+            user_role: user.user_role
         });
     });
 });

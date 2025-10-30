@@ -8,6 +8,8 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -38,7 +40,7 @@ app.listen(PORT, () => {
 app.post('/register', (req, res) => {
     const { first_name,last_name, username, password, phone, email, address } = req.body;
     const query = `
-        INSERT INTO users (first_name, last_name, username, password, phone, email, address) 
+        INSERT INTO users (first_name, last_name, username, password_hash, phone, email, address) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     db.query(query, [first_name, last_name, username, password, phone, email, address], (err, result) => {
@@ -56,7 +58,7 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+    const query = 'SELECT * FROM users WHERE username = ? AND password_hash = ?';
     db.query(query, [username, password], (err, results) => {
         if (err) {
             console.error(err);
@@ -96,10 +98,10 @@ app.post('/buyEvent', (req, res) => {
 app.post('/registerEventOrg', (req, res) => {
     const { first_name, last_name, username, phone, email, address, password, user_role } = req.body;
     const query = `
-        INSERT INTO users (first_name, last_name, username, phone, email, address, password, user_role)
+        INSERT INTO users (first_name, last_name, username, phone, email, address, password_hash, user_role)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-    db.query(query, [first_name, last_name, username, phone, email, address, password], (err, result) => {
+    db.query(query, [first_name, last_name, username, phone, email, address, password, user_role], (err, result) => {
         if (err) {
             console.error('Error inserting user into database:', err);
             return res.status(500).send('Error registering Event Organizer');
@@ -111,7 +113,7 @@ app.post('/registerEventOrg', (req, res) => {
 // Login user
 app.post('/loginEventOrg', (req, res) => {
     const { username, password } = req.body;
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+    const query = 'SELECT * FROM users WHERE username = ? AND password_hash = ?';
     db.query(query, [username, password], (err, results) => {
         if (err) {
             console.error(err);

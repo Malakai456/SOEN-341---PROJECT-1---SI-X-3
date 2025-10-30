@@ -103,7 +103,7 @@ async function registerEventOrganizer() {
 
 try{
         
-        const response = await fetch('http://localhost:5000/registerEventOrg', {
+        const response = await fetch('/registerEventOrg', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEventOrg),

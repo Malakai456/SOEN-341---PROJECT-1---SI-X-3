@@ -134,12 +134,15 @@ app.post('/loginEventOrg', (req, res) => {
         const user = results[0];
         res.status(200).json({
             user_id: user.user_id,
+            status:  user.status,
             first_name: user.first_name,
             last_name: user.last_name,
             username: user.username,
             email: user.email,
             phone: user.phone,
-            address: user.address
+            address: user.address,
+            status: user.status ?? 'approved',
+            organizer_id: user.organizer_id ?? user.user_id ?? null
         });
     });
 });
@@ -162,5 +165,61 @@ app.post('/buy', (req, res) => {
       return res.status(500).send('Database error');
     }
     return res.status(200).json({ ok: true, message: 'Purchase recorded' });
+  });
+});
+
+// Admin guard that checks DB for admin role
+function adminGuard(req, res, next) {
+  const userId = Number(req.header('x-user-id') || 0);
+  if (!userId) return res.status(401).json({ error: 'missing user' });
+
+  const sql = 'SELECT role FROM users WHERE user_id = ? LIMIT 1';
+  db.query(sql, [userId], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (!rows.length || rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'admin only' });
+    }
+    req.userId = userId; 
+    next();
+  });
+}
+
+// Display pending organizer requests
+app.get('/api/admin/organizers/pending', adminGuard, (req, res) => {
+  const sql = `
+    SELECT organizer_id, first_name, last_name, username, email, created_at
+    FROM event_organizers
+    WHERE status = 'pending'
+    ORDER BY created_at DESC
+  `;
+  db.query(sql, (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json(rows);
+  });
+});
+
+//Approve or reject a specific organizer
+app.patch('/api/admin/organizers/:organizerId', adminGuard, (req, res) => {
+  const organizerId = Number(req.params.organizerId);
+  const { decision } = req.body; // 'approve' or'reject'
+
+  if (!organizerId) return res.status(400).json({ error: 'bad id' });
+  if (!['approve','reject'].includes(decision)) {
+    return res.status(400).json({ error: 'decision must be approve|reject' });
+  }
+
+  const newStatus = decision === 'approve' ? 'approved' : 'rejected';
+  const sql = `
+    UPDATE event_organizers
+       SET status = ?
+     WHERE organizer_id = ? AND status = 'pending'
+  `;
+
+  db.query(sql, [newStatus, organizerId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'no pending request for this organizer' });
+    }
+    res.json({ ok: true, organizerId, decision });
   });
 });

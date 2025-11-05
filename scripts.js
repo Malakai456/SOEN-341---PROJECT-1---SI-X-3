@@ -150,3 +150,71 @@ async function loginEventOrganizer() {
     }
 }
 
+// --- Pretend login helpers using localStorage ---
+
+function getLoggedUser() {
+  try {
+    return JSON.parse(localStorage.getItem('loggedUser') || 'null'); // { user_id, username } or null
+  } catch {
+    return null;
+  }
+}
+
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector('.username-display');
+  const logoutBtn = document.querySelector('.logout-btn');
+
+  if (user) {
+    if (display)  display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+  } else {
+    if (display)  display.textContent = '';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem('loggedUser');
+  alert('Logged out!');
+  window.location.href = 'login.html';
+}
+
+// --- Buy handler (minimal; uses existing buttons with data-event-id) ---
+async function buyEvent(event_id) {
+  const user = getLoggedUser();
+  if (!user) {
+    alert('Please log in first.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/buy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, event_id })
+    });
+
+    if (!res.ok) {
+      const t = await res.text();
+      alert('❌ ' + t);
+      return;
+    }
+
+    alert('✅ Purchase recorded!');
+  } catch (err) {
+    alert('⚠️ Network error: ' + err.message);
+  }
+}
+
+// Delegated listener (so we don't touch teammates' markup)
+// Any element with [data-event-id] will trigger a buy
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-event-id]');
+  if (!btn) return;
+  const idStr = btn.getAttribute('data-event-id');
+  const eventId = Number(idStr);
+  if (eventId) buyEvent(eventId);
+});
+

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,7 +45,6 @@
 <div class="event-grid" id="eventGrid"></div>
 
 <script src="scripts.js"></script>
-<!-- <script src="ticket.js"></script> -->
 
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 
@@ -139,5 +138,135 @@ updateFilterOptions();
 <script>showLoggedUser();</script>
 
 </main>
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>All Events - CampusEvents</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+<header>
+  <h2 class="companyname">
+    <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+  </h2>
+  <nav class="navigation">
+    <a href="mainpage.html">Home</a>
+    <a href="contact.html">Contact</a>
+    <a href="calendar.html">My Calendar</a>
+    <a href="register.html" class="signInButton">Sign Up</a>
+    <a href="login.html" class="loginbutton">Log In</a>
+  </nav>
+</header>
+
+<main>
+  <div class="filter-bar">
+    <label for="filterType">Filter by:</label>
+    <select id="filterType">
+      <option value="club">Club</option>
+      <option value="price">Price</option>
+      <option value="date">Date</option>
+    </select>
+
+    <label for="filterValue">Select:</label>
+    <select id="filterValue"></select>
+  </div>
+
+  <div id="messageBox"></div>
+  <div id="eventGrid" class="event-grid"></div>
+</main>
+
+<script src="scripts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
+
+<script>
+const eventGrid = document.getElementById('eventGrid');
+let events = []; 
+
+
+function displayEvents(eventList) {
+  eventGrid.innerHTML = ''; 
+
+  eventList.forEach(event => {
+    const card = document.createElement('div');
+    card.classList.add('event-card', 'mix', event.location_name.replace(/\s+/g, ''));
+    card.setAttribute('data-price', event.price);
+    card.setAttribute('data-date', event.event_date);
+    card.setAttribute('data-club', event.location_name.replace(/\s+/g, ''));
+
+
+    card.innerHTML = `
+     <img src="${event.image}" alt="${event.title}">
+      <h3>${event.title}</h3>
+      <p><strong>Date:</strong> ${event.event_date}</p>
+      <p><strong>Time:</strong> ${event.event_time}</p>
+      <p><strong>Location:</strong> ${event.location_name}</p>
+      <p>${event.description || ''}</p>
+      <div class="event-footer">
+        <span class="price">$${event.price}</span>
+        <button class="buy-button"
+          onclick="buyEvent(${event.event_id}, '${event.title}', '${event.description}', '${event.location_name}', '${event.event_date}', '${event.event_time}', ${event.price})">
+          Buy
+        </button>
+      </div>
+    `;
+    eventGrid.appendChild(card);
+  });
+}
+
+fetch("http://localhost:5000/api/events")
+  .then(res => res.json())
+  .then(data => {
+    events = data;
+    if (events.length > 0) {
+      displayEvents(events);
+      document.getElementById('messageBox').innerHTML = 
+        `<p style="color:green;text-align:center;">${events.length} event(s) available!</p>`;
+      updateFilterOptions();
+    } else {
+      document.getElementById('messageBox').innerHTML = 
+        `<p style="color:red;text-align:center;">No events found.</p>`;
+    }
+  })
+  .catch(err => {
+    console.error("Error loading events:", err);
+    document.getElementById('messageBox').textContent = "⚠️ Could not load events.";
+  });
+
+const mixer = mixitup('#eventGrid', {
+  selectors: { target: '.mix' },
+  animation: { duration: 300 }
+});
+
+const filterType = document.getElementById('filterType');
+const filterValue = document.getElementById('filterValue');
+
+function updateFilterOptions() {
+  filterValue.innerHTML = '';
+  const type = filterType.value;
+  let uniqueOptions = [];
+
+  if (type === 'club') uniqueOptions = [...new Set(events.map(e => e.location_name))];
+  if (type === 'price') uniqueOptions = [...new Set(events.map(e => e.price))];
+  if (type === 'date') uniqueOptions = [...new Set(events.map(e => e.event_date))];
+
+  filterValue.innerHTML = `<option value="all">All</option>`;
+  uniqueOptions.forEach(opt => {
+    const option = document.createElement('option');
+    option.value = type === 'club' ? '.' + opt.replace(/\s+/g, '') : `[data-${type}='${opt}']`;
+    option.textContent = opt;
+    filterValue.appendChild(option);
+  });
+
+  mixer.filter('all');
+}
+
+filterType.addEventListener('change', updateFilterOptions);
+filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
+</script>
+
 </body>
 </html>

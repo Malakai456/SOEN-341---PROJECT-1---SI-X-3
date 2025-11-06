@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h1> Admin Dashboard </h1>
+
+  <h2>Manage Users</h2>
+  <table id="userTable">
+    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+  </table>
+
+  <h2>Manage Events</h2>
+  <table id="eventTable">
+    <tr><th>Event Title</th><th>Date</th><th>Price</th></tr>
+  </table> 
+
+  <script>
+
+ async function updateRole(id, role) {
+    await fetch(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role })
+    });
+    
+  }
+
+  </script>
+
+</body>
+</html>
+ 

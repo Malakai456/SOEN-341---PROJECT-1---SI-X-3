@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql');  // *****
 const express = require('express'); 
 const path = require('path'); // if not already present
 
@@ -10,7 +10,7 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());                      // for JSON fetches
 app.use(express.urlencoded({ extended: true })); // for form POSTs
-app.use(express.static(__dirname));
+app.use(express.static(__dirname,));
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -20,7 +20,7 @@ app.get('/', (req, res) => {
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', 
-    port:'3307',
+    port:'3306',
     password: '', 
     database: "341_project" 
 });

@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql');  // *****
 const express = require('express'); 
 const path = require('path'); // if not already present
 
@@ -10,7 +10,7 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());                      // for JSON fetches
 app.use(express.urlencoded({ extended: true })); // for form POSTs
-app.use(express.static(__dirname));
+app.use(express.static(__dirname,));
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -180,6 +180,40 @@ app.post('/buy', (req, res) => {
   });
 });
 
+app.get('/admin/users', (req, res) => {
+    const query = 'SELECT * FROM users';
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching users');
+        res.json(results);
+    });
+});
+
+app.get('/admin/organizations', (req, res) => {
+    const query = 'SELECT * FROM organizations';
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching organizations');
+        res.json(results);
+    });
+});
+
+  app.put('/admin/users/:id/role', (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+    db.query('UPDATE users SET role = ? WHERE user_id = ?', [role, id], (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send('User role updated ');
+    });
+  });
+
+  app.delete('/admin/users/:id', (req, res) => {
+    const userId = req.params.id;
+    const query = 'DELETE FROM users WHERE user_id = ?';
+    db.query(query, [userId], (err, result) => {
+        if (err) return res.status(500).send('Error deleting user');
+        res.send('User deleted successfully');
+    });
+});
+ 
 // === Admin moderation endpoints ===
 
 app.get('/admin/events/flagged', (req, res) => {

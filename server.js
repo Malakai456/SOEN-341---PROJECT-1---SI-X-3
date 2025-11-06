@@ -20,9 +20,11 @@ app.get('/', (req, res) => {
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', 
-    port:'3307',
+    //port:'3307',
+    port:'3306',
     password: '', 
-    database: "341_project" 
+    //database: "341_project" 
+    database: "341_project_sarah" 
 });
 
 db.connect((err) => {
@@ -130,13 +132,17 @@ app.post('/loginEventOrg', (req, res) => {
 
         const user = results[0];
         res.status(200).json({
+            user_id: user.user_id,
+            status:  user.status,
             org_id: user.org_id,
             first_name: user.first_name,
             last_name: user.last_name,
             username: user.username,
             email: user.email,
             phone: user.phone,
-            address: user.address
+            address: user.address,
+            role: user.role,                             // 'user' or 'admin' or 'organizer'
+            organizer_status: user.organizer_status       // 'none' or 'pending' or'approved' | 'rejected'
         });
     });
 });
@@ -162,6 +168,62 @@ app.post('/buy', (req, res) => {
   });
 });
 
+// Admin guard that checks DB for admin role
+function adminGuard(req, res, next) {
+  const userId = Number(req.header('x-user-id') || 0);
+  if (!userId) return res.status(401).json({ error: 'missing user' });
+
+  const sql = 'SELECT role FROM users WHERE user_id = ? LIMIT 1';
+  db.query(sql, [userId], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (!rows.length || rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'admin only' });
+    }
+    req.userId = userId; 
+    next();
+  });
+}
+
+// Display pending organizer requests
+app.get('/api/admin/organizers/pending', adminGuard, (req, res) => {
+  const sql = `
+    SELECT user_id, first_name, last_name, username, email, created_at
+    FROM users
+    WHERE organizer_status = 'pending'
+    ORDER BY created_at DESC
+  `;
+  db.query(sql, (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json(rows);
+  });
+});
+
+//Approve or reject a specific organizer
+app.patch('/api/admin/organizers/:userId', adminGuard, (req, res) => {
+  const userId = Number(req.params.userId);
+  const { decision } = req.body; // 'approve' or will be 'reject'
+
+  if (!userId) return res.status(400).json({ error: 'bad id' });
+  if (!['approve', 'reject'].includes(decision)) {
+    return res.status(400).json({ error: 'decision must be approve|reject' });
+  }
+
+  const sql =
+    decision === 'approve'
+      ? `UPDATE users
+           SET organizer_status = 'approved', role = 'organizer'
+         WHERE user_id = ? AND organizer_status = 'pending'`
+      : `UPDATE users
+           SET organizer_status = 'rejected', role = 'user'
+         WHERE user_id = ? AND organizer_status = 'pending'`;
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'No pending request for this user' });
+    }
+    res.json({ ok: true, userId, decision });
+  });
 
 // WHEN EVENT ORGANIZER CREATES EVENTS 
 app.post('/api/events', (req, res) => {

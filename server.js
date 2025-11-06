@@ -20,11 +20,9 @@ app.get('/', (req, res) => {
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', 
-    //port:'3307',
     port:'3306',
     password: '', 
-    //database: "341_project" 
-    database: "341_project_sarah" 
+    database: "341_project_SARAH" 
 });
 
 db.connect((err) => {
@@ -36,6 +34,20 @@ db.connect((err) => {
 });
 
 
+
+const MODERATION_STATUSES = [
+  'pending',
+  'flagged',
+  'approved',
+  'needs_revision',
+  'removed'
+];
+
+const ACTION_TO_STATUS = {
+  approve: 'approved',
+  remove: 'removed',
+  flag_for_revision: 'needs_revision'
+};
 
 
 app.post('/register', (req, res) => {
@@ -168,6 +180,104 @@ app.post('/buy', (req, res) => {
   });
 });
 
+// === Admin moderation endpoints ===
+
+app.get('/admin/events/flagged', (req, res) => {
+  const sql = `
+    SELECT
+      e.event_id,
+      e.title,
+      e.description,
+      e.starts_at,
+      e.ends_at,
+      e.capacity,
+      e.ticket_policy,
+      e.moderation_status,
+      o.org_name AS organization_name,
+      l.name AS location_name
+    FROM events e
+    LEFT JOIN organizations o ON e.org_id = o.org_id
+    LEFT JOIN locations l ON e.location_id = l.location_id
+    WHERE e.moderation_status = 'flagged'
+    ORDER BY e.starts_at ASC, e.created_at DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('❌ /admin/events/flagged SQL error:', err.code, err.sqlMessage || err.message);
+      return res.status(500).json({ message: 'Database error fetching flagged events' });
+    }
+    res.json(results || []);
+  });
+});
+
+app.patch('/admin/events/:eventId/moderation', (req, res) => {
+  const eventId = Number(req.params.eventId);
+  const { action } = req.body || {};
+
+  if (!Number.isInteger(eventId) || eventId <= 0) {
+    return res.status(400).json({ message: 'Invalid event id' });
+  }
+
+  if (!action || !ACTION_TO_STATUS[action]) {
+    return res.status(400).json({ message: 'Invalid moderation action' });
+  }
+
+  const newStatus = ACTION_TO_STATUS[action];
+
+  if (!MODERATION_STATUSES.includes(newStatus)) {
+    return res.status(400).json({ message: 'Unsupported moderation status' });
+  }
+
+  const updateSql = `
+    UPDATE events
+    SET moderation_status = ?
+    WHERE event_id = ?
+  `;
+
+  db.query(updateSql, [newStatus, eventId], (updateErr, updateResult) => {
+    if (updateErr) {
+      console.error('❌ /admin/events/:id/moderation SQL error:', updateErr.code, updateErr.sqlMessage || updateErr.message);
+      return res.status(500).json({ message: 'Database error updating moderation status' });
+    }
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    const fetchSql = `
+      SELECT
+        e.event_id,
+        e.title,
+        e.description,
+        e.starts_at,
+        e.ends_at,
+        e.capacity,
+        e.ticket_policy,
+        e.moderation_status,
+        o.org_name AS organization_name,
+        l.name AS location_name
+      FROM events e
+      LEFT JOIN organizations o ON e.org_id = o.org_id
+      LEFT JOIN locations l ON e.location_id = l.location_id
+      WHERE e.event_id = ?
+      LIMIT 1
+    `;
+
+    db.query(fetchSql, [eventId], (fetchErr, rows) => {
+      if (fetchErr) {
+        console.error('❌ /admin/events/:id/moderation fetch SQL error:', fetchErr.code, fetchErr.sqlMessage || fetchErr.message);
+        return res.status(500).json({ message: 'Database error fetching updated event' });
+      }
+
+      if (!rows || rows.length === 0) {
+        return res.status(404).json({ message: 'Event not found after update' });
+      }
+
+      res.json(rows[0]);
+    });
+  });
+});
 // Admin guard that checks DB for admin role
 function adminGuard(req, res, next) {
   const userId = Number(req.header('x-user-id') || 0);

@@ -1,13 +1,16 @@
 const mysql = require('mysql');
 const express = require('express'); 
+const path = require('path'); // if not already present
+
 
 const cors = require('cors');
 const app = express();
 
 const PORT = 5000;
 app.use(cors());
-app.use(express.json());
-
+app.use(express.json());                      // for JSON fetches
+app.use(express.urlencoded({ extended: true })); // for form POSTs
+app.use(express.static(__dirname));
 app.get('/', (req, res) => {
     res.send('Server is running!');
 });
@@ -17,8 +20,11 @@ app.get('/', (req, res) => {
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', 
+    //port:'3307',
+    port:'3306',
     password: '', 
-    database: "341_project_sara" 
+    //database: "341_project" 
+    database: "341_project_sarah" 
 });
 
 db.connect((err) => {
@@ -51,29 +57,35 @@ app.post('/register', (req, res) => {
 
 
 app.post('/login', (req, res) => {
-    const { username, password } = req.body;
+  // support both JSON and form-encoded bodies
+  const username = (req.body && (req.body.username ?? req.body['username'])) || '';
+  const password = (req.body && (req.body.password ?? req.body['password'])) || '';
 
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-    db.query(query, [username, password], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error logging in.');
-        }
-        if (results.length === 0) {
-            return res.status(401).send('Invalid username or password.');
-        }
-        
-        const user = results[0];
-        res.status(200).json({
-            user_id: user.user_id, 
-            first_name: user.first_name,
-            last_name : user.last_name,
-            username: user.username,
-            email: user.email,
-            phone: user.phone,
-            address: user.address
-        });
-    });
+  if (!username || !password) return res.status(400).send('Missing credentials');
+
+  const sql = 'SELECT user_id, username FROM users WHERE username = ? AND password = ?';
+  db.query(sql, [username, password], (err, results) => {
+    if (err) {
+      console.error('❌ /login SQL error:', err.code, err.sqlMessage || err.message);
+      return res.status(500).send('Database error');
+    }
+    if (results.length === 0) return res.status(401).send('Invalid username or password');
+
+    const user = results[0];
+
+    // if JSON expected, send JSON; otherwise send small HTML that sets localStorage & redirects
+    const wantsJson =
+      (req.headers['content-type'] || '').includes('application/json') ||
+      (req.headers['accept'] || '').includes('application/json');
+
+    if (wantsJson) return res.json({ message: 'Login successful', user });
+
+    const payload = JSON.stringify(user).replace(/</g, '\\u003c');
+    res.send(`<!doctype html><meta charset="utf-8"><script>
+      localStorage.setItem('loggedUser', '${payload}');
+      location.href = 'events.html';
+    </script>`);
+  });
 });
 app.post('/buyEvent', (req, res) => {
     const { title, price, location } = req.body;
@@ -120,18 +132,98 @@ app.post('/loginEventOrg', (req, res) => {
 
         const user = results[0];
         res.status(200).json({
+            user_id: user.user_id,
+            status:  user.status,
             org_id: user.org_id,
             first_name: user.first_name,
             last_name: user.last_name,
             username: user.username,
             email: user.email,
             phone: user.phone,
-            address: user.address
+            address: user.address,
+            role: user.role,                             // 'user' or 'admin' or 'organizer'
+            organizer_status: user.organizer_status       // 'none' or 'pending' or'approved' | 'rejected'
         });
     });
 });
 
+// === BUY: insert into event_buys (user_id, event_id, time) ===
+// expects JSON: { user_id, event_id }
+app.post('/buy', (req, res) => {
+  let { user_id, event_id } = req.body;
 
+  user_id  = Number(user_id);
+  event_id = Number(event_id);
+  if (!user_id || !event_id) return res.status(400).send('Invalid payload');
+
+  // NOTE: time column is named `time` (quote it)
+  const sql = 'INSERT INTO event_buys (user_id, event_id, `time`) VALUES (?, ?, NOW())';
+
+  db.query(sql, [user_id, event_id], (err) => {
+    if (err) {
+      console.error('❌ /buy SQL error:', err.code, err.sqlMessage);
+      return res.status(500).send('Database error');
+    }
+    return res.status(200).json({ ok: true, message: 'Purchase recorded' });
+  });
+});
+
+// Admin guard that checks DB for admin role
+function adminGuard(req, res, next) {
+  const userId = Number(req.header('x-user-id') || 0);
+  if (!userId) return res.status(401).json({ error: 'missing user' });
+
+  const sql = 'SELECT role FROM users WHERE user_id = ? LIMIT 1';
+  db.query(sql, [userId], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (!rows.length || rows[0].role !== 'admin') {
+      return res.status(403).json({ error: 'admin only' });
+    }
+    req.userId = userId; 
+    next();
+  });
+}
+
+// Display pending organizer requests
+app.get('/api/admin/organizers/pending', adminGuard, (req, res) => {
+  const sql = `
+    SELECT user_id, first_name, last_name, username, email, created_at
+    FROM users
+    WHERE organizer_status = 'pending'
+    ORDER BY created_at DESC
+  `;
+  db.query(sql, (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json(rows);
+  });
+});
+
+//Approve or reject a specific organizer
+app.patch('/api/admin/organizers/:userId', adminGuard, (req, res) => {
+  const userId = Number(req.params.userId);
+  const { decision } = req.body; // 'approve' or will be 'reject'
+
+  if (!userId) return res.status(400).json({ error: 'bad id' });
+  if (!['approve', 'reject'].includes(decision)) {
+    return res.status(400).json({ error: 'decision must be approve|reject' });
+  }
+
+  const sql =
+    decision === 'approve'
+      ? `UPDATE users
+           SET organizer_status = 'approved', role = 'organizer'
+         WHERE user_id = ? AND organizer_status = 'pending'`
+      : `UPDATE users
+           SET organizer_status = 'rejected', role = 'user'
+         WHERE user_id = ? AND organizer_status = 'pending'`;
+
+  db.query(sql, [userId], (err, result) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ message: 'No pending request for this user' });
+    }
+    res.json({ ok: true, userId, decision });
+  });
 
 // WHEN EVENT ORGANIZER CREATES EVENTS 
 app.post('/api/events', (req, res) => {

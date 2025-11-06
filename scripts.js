@@ -124,30 +124,61 @@ try{
 
 
 async function loginEventOrganizer() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) {
+    alert('Please enter username and password.');
+    return;
+  }
 
-    try {
-        const response = await fetch('http://localhost:5000/loginEventOrg', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
+  try {
+    const res = await fetch('/loginEventOrg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
 
-        if (response.ok) {
-            const user = await response.json();
-           localStorage.setItem('currentUser', JSON.stringify(user));
-           alert('Login successful!');
-            window.location.href = './create_events.html';
-        } else {
-            const error = await response.text();
-            console.log(error)
-            alert('Login failed: ' + error);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Failed to login. Please try again later.');
+    if (!res.ok) {
+      const msg = await res.text().catch(()=>'Login failed');
+      alert('Login failed: ' + msg);
+      return;
     }
+
+    const data = await res.json();
+    const status = data.status ?? 'approved';
+
+    const organizer = {
+      user_id:    data.user_id,
+      username:   data.username ?? '',
+      first_name: data.first_name ?? '',
+      last_name:  data.last_name ?? '',
+      email:      data.email ?? '',
+      status,
+      role: 'organizer'
+    };
+    localStorage.setItem('currentOrganizer', JSON.stringify(organizer));
+
+    // compatibility for teh older pages
+    localStorage.setItem('currentUser', JSON.stringify({
+      user_id:    organizer.user_id,
+      username:   organizer.username,
+      first_name: organizer.first_name,
+      last_name:  organizer.last_name,
+      email:      organizer.email,
+      role:       'organizer'
+    }));
+
+    if (status !== 'approved') {
+      alert(`Your organizer account is "${status}". Please wait for admin approval.`);
+      return;
+    }
+
+    alert('Login successful!');
+    window.location.href = './create_events.html';
+  } catch (err) {
+    console.error(err);
+    alert('Failed to login. Please try again later.');
+  }
 }
 function getLoggedUser() {
   try {
@@ -255,4 +286,72 @@ document.addEventListener('click', (e) => {
   if (id) buyEvent(id);
 });
 
+
+// --- Pretend login helpers using localStorage ---
+
+function getLoggedUser() {
+  try {
+    return JSON.parse(localStorage.getItem('loggedUser') || 'null'); // { user_id, username } or null
+  } catch {
+    return null;
+  }
+}
+
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector('.username-display');
+  const logoutBtn = document.querySelector('.logout-btn');
+
+  if (user) {
+    if (display)  display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+  } else {
+    if (display)  display.textContent = '';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem('loggedUser');
+  alert('Logged out!');
+  window.location.href = 'login.html';
+}
+
+// --- Buy handler (minimal; uses existing buttons with data-event-id) ---
+async function buyEvent(event_id) {
+  const user = getLoggedUser();
+  if (!user) {
+    alert('Please log in first.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch('/buy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, event_id })
+    });
+
+    if (!res.ok) {
+      const t = await res.text();
+      alert('❌ ' + t);
+      return;
+    }
+
+    alert('✅ Purchase recorded!');
+  } catch (err) {
+    alert('⚠️ Network error: ' + err.message);
+  }
+}
+
+// Delegated listener (so we don't touch teammates' markup)
+// Any element with [data-event-id] will trigger a buy
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-event-id]');
+  if (!btn) return;
+  const idStr = btn.getAttribute('data-event-id');
+  const eventId = Number(idStr);
+  if (eventId) buyEvent(eventId);
+});
 

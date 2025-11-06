@@ -6,6 +6,7 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "googleapis": "^162.0.0",
+    "mysql": "^2.18.1",
     "mysql2": "^3.15.2"
   },
   "name": "soen-341---project-1-",

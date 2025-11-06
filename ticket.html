@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="/styles.css"/>
 
   <!--QR library (draws QR image into a DIV)-->
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script defer src="/ticket.js"></script>
 </head>
 <body>
@@ -38,7 +38,7 @@
     <div id="qrcode" style="width:256px;height:256px;"></div>
 
     <p style="margin-top:12px;">
-      If the QR doesn't load, refresh. If staff needs to verify manually, they can open the link the QR encodes.
+      <!-- If the QR doesn't load, refresh. If staff needs to verify manually, they can open the link the QR encodes. -->
     </p>
     <p>Open here: <a id="verifyLink" href="#" target="_blank" rel="noopener"></a></p>
   </main>

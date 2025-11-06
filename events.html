@@ -4,21 +4,28 @@
     <meta charset="UTF-8">
     <title>All Events - CampusEvents</title>
     <link rel="stylesheet" href="styles.css">
-
 </head>
 <body>
 
 <header>
     <h2 class="logo"></h2>
-    <h2 class = "companyname"><a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
+    <h2 class="companyname">
+        <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+    </h2>
     <nav class="navigation">
         <a href="mainpage.html">Home</a>
         <a href="contact.html">Contact</a>
-         <a href="calendar.html">My Calendar</a>
+        <a href="calendar.html">My Calendar</a>
         <a href="register.html" class="signInButton">Sign In</a>
         <a href="login.html" class="loginbutton">Log In</a>
     </nav>
 </header>
+
+<!-- added: shows current logged user + logout -->
+<p style="margin-left:20px;">
+  Welcome, <span class="username-display"></span>!
+  <button class="logout-btn" onclick="logoutUser()" style="display:none;">Logout</button>
+</p>
 
 <main>
 <div class="filter-bar">
@@ -30,62 +37,51 @@
     </select>
 
     <label for="filterValue">Select:</label>
-    <select id="filterValue">
-    </select>
+    <select id="filterValue"></select>
 </div>
+
 <div id="messageBox"></div>
+<div class="event-grid" id="eventGrid"></div>
 
-<div class="event-grid" id="eventGrid">
-</div>
 <script src="scripts.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
+
 <script>
 const events = [
-    { title:"Hackathon 2025", date:"2026-12-15", time : "08:00",location:"Engineering Club", price:10, image:"hackathon.png", details:"24-hour coding challenge!" },
-    { title:"Karaoke Night", date:"2026-02-21", time : "18:00",location:"Business Club", price:5, image:"karaoke.png", details:"Sing your heart out" },
-    { title:"Arts and Crafts", date:"2026-03-25", time :"17:00",location:"Arts Club", price:8, image:"artsandcrafts.png", details:"Explore arts and painting ." },
-    { title:"Chess Night", date:"2026-04-02", time : "19:00" ,location:"Finance Club", price:7, image:"chess.png", details:"Chess tournament 1V1" },
-    { title:"Movie Night", date:"2026-01-10", time : "20:00" ,location:"Cinema Club", price:6, image:"movie.png", details:"Watch latest movies together." },
-    { title:"Cooking Workshop", date:"2026-02-28", time : "16:00" ,location:"Culinary Club", price:12, image:"cooking.png", details:"Learn some delicious recipes." },
-    { title:"Dance Battle", date:"2026-03-15", time : "18:00" , location:"Dance Club", price:8, image:"dance.png", details:"Show your moves." },
-    { title:"Gaming Tournament", date:"2026-05-05", time : "17:00" ,location:"Gaming Club", price:10, image:"gaming.png", details:"Compete in esports." },
-    { title:"Book Club Meetup", date:"2026-06-12", time : "11:00" , location:"Library", price:5, image:"book.png", details:"Discuss latest books." }
+    { id: 101, title:"Hackathon 2025", date:"2025-12-15", time:"08:00", location:"Engineering Club", price:10, image:"hackathon.png", details:"24-hour coding challenge!" },
+    { id: 102, title:"Karaoke Night", date:"2025-02-21", time:"18:00", location:"Business Club", price:5, image:"karaoke.png", details:"Sing your heart out" },
+    { id: 103, title:"Arts and Crafts", date:"2025-03-25", time:"17:00", location:"Arts Club", price:8, image:"artsandcrafts.png", details:"Explore arts and painting." },
+    { id: 104, title:"Chess Night", date:"2025-04-02", time:"19:00", location:"Finance Club", price:7, image:"chess.png", details:"Chess tournament 1V1" },
+    { id: 105, title:"Movie Night", date:"2025-01-10", time:"20:00", location:"Cinema Club", price:6, image:"movie.png", details:"Watch latest movies together." },
+    { id: 106, title:"Cooking Workshop", date:"2025-02-28", time:"16:00", location:"Culinary Club", price:12, image:"cooking.png", details:"Learn some delicious recipes." },
+    { id: 107, title:"Dance Battle", date:"2025-03-15", time:"18:00", location:"Dance Club", price:8, image:"dance.png", details:"Show your moves." },
+    { id: 108, title:"Gaming Tournament", date:"2025-05-05", time:"17:00", location:"Gaming Club", price:10, image:"gaming.png", details:"Compete in esports." },
+    { id: 109, title:"Book Club Meetup", date:"2025-06-12", time:"11:00", location:"Library", price:5, image:"book.png", details:"Discuss latest books." }
 ];
 
-
-
 const eventGrid = document.getElementById('eventGrid');
-function displayEvents(eventList) {
-  eventList.forEach(event => {
+events.forEach(event => {
     const card = document.createElement('div');
-    card.classList.add('event-card', 'mix', (event.location_name || event.location).replace(/\s+/g,''));
+    card.classList.add('event-card', 'mix', event.location.replace(/\s+/g,''));
     card.setAttribute('data-price', event.price);
-    card.setAttribute('data-date', event.event_date || event.date);
-    card.setAttribute('data-club', (event.location_name || event.location).replace(/\s+/g,''));
-    
+    card.setAttribute('data-date', event.date);
+    card.setAttribute('data-club', event.location.replace(/\s+/g,''));
     card.innerHTML = `
-      <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
-      <h3>${event.title}</h3>
-      <p><strong>Date:</strong> ${event.event_date || event.date}</p>
-      <p><strong>Time:</strong> ${event.event_time || event.time}</p>
-      <p><strong>Location:</strong> ${event.location_name || event.location}</p>
-      <p>${event.description || event.details || ''}</p>
-      <div class="event-footer">
-        <span class="price">$${event.price}</span>
-        <button class="buy-button" onclick="buyEvent(
-          '${event.title}',
-          '${event.description || event.details || ''}',
-          '${event.location_name || event.location}',
-          '${event.event_date || event.date}',
-          '${event.event_time || event.time}',
-          ${event.price}
-        )">Buy</button>
-      </div>
+        <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
+        <h3>${event.title}</h3>
+        <p><strong>Date:</strong> ${event.date}</p>
+        <p><strong>Time:</strong> ${event.time}</p>
+        <p><strong>Location:</strong> ${event.location}</p>
+        <p>${event.details || ''}</p>
+        <div class="event-footer">
+            <span class="price">$${event.price}</span>
+            <!-- added data-event-id -->
+            <button class="buy-button" data-event-id="${event.id}">Buy</button>
+        </div>
     `;
     eventGrid.appendChild(card);
   });
-}
+
 
 displayEvents(events);
 
@@ -129,13 +125,12 @@ function updateFilterOptions() {
 
 filterType.addEventListener('change', updateFilterOptions);
 filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
-
 updateFilterOptions();
-
-
-
-
 </script>
 
+<!-- added small call to show user info -->
+<script>showLoggedUser();</script>
+
+</main>
 </body>
 </html>

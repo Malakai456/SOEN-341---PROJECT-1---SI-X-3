@@ -67,7 +67,7 @@ async function decide(userId, decision) {
   if (res.status === 403) { msg.textContent = 'Access denied: admin only.'; return; }
 
   if (!res.ok) {
-    const data = await res.json().catch(()=>({}));
+    const data = await res.json().catch(() => ({}));
     msg.textContent = `❌ Failed: ${data.message || data.error || res.status}`;
     return;
   }

@@ -20,9 +20,11 @@ app.get('/', (req, res) => {
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root', 
-    port:'3307',
+    //port:'3307',
+    port:'3306',
     password: '', 
-    database: "341_project" 
+    //database: "341_project" 
+    database: "341_project_sarah" 
 });
 
 db.connect((err) => {
@@ -141,8 +143,8 @@ app.post('/loginEventOrg', (req, res) => {
             email: user.email,
             phone: user.phone,
             address: user.address,
-            status: user.status ?? 'approved',
-            organizer_id: user.organizer_id ?? user.user_id ?? null
+            role: user.role,                             // 'user' or 'admin' or 'organizer'
+            organizer_status: user.organizer_status       // 'none' or 'pending' or'approved' | 'rejected'
         });
     });
 });
@@ -187,9 +189,9 @@ function adminGuard(req, res, next) {
 // Display pending organizer requests
 app.get('/api/admin/organizers/pending', adminGuard, (req, res) => {
   const sql = `
-    SELECT organizer_id, first_name, last_name, username, email, created_at
-    FROM event_organizers
-    WHERE status = 'pending'
+    SELECT user_id, first_name, last_name, username, email, created_at
+    FROM users
+    WHERE organizer_status = 'pending'
     ORDER BY created_at DESC
   `;
   db.query(sql, (err, rows) => {
@@ -199,27 +201,29 @@ app.get('/api/admin/organizers/pending', adminGuard, (req, res) => {
 });
 
 //Approve or reject a specific organizer
-app.patch('/api/admin/organizers/:organizerId', adminGuard, (req, res) => {
-  const organizerId = Number(req.params.organizerId);
-  const { decision } = req.body; // 'approve' or'reject'
+app.patch('/api/admin/organizers/:userId', adminGuard, (req, res) => {
+  const userId = Number(req.params.userId);
+  const { decision } = req.body; // 'approve' or will be 'reject'
 
-  if (!organizerId) return res.status(400).json({ error: 'bad id' });
-  if (!['approve','reject'].includes(decision)) {
+  if (!userId) return res.status(400).json({ error: 'bad id' });
+  if (!['approve', 'reject'].includes(decision)) {
     return res.status(400).json({ error: 'decision must be approve|reject' });
   }
 
-  const newStatus = decision === 'approve' ? 'approved' : 'rejected';
-  const sql = `
-    UPDATE event_organizers
-       SET status = ?
-     WHERE organizer_id = ? AND status = 'pending'
-  `;
+  const sql =
+    decision === 'approve'
+      ? `UPDATE users
+           SET organizer_status = 'approved', role = 'organizer'
+         WHERE user_id = ? AND organizer_status = 'pending'`
+      : `UPDATE users
+           SET organizer_status = 'rejected', role = 'user'
+         WHERE user_id = ? AND organizer_status = 'pending'`;
 
-  db.query(sql, [newStatus, organizerId], (err, result) => {
+  db.query(sql, [userId], (err, result) => {
     if (err) return res.status(500).json({ error: 'db error' });
     if (result.affectedRows === 0) {
-      return res.status(409).json({ message: 'no pending request for this organizer' });
+      return res.status(409).json({ message: 'No pending request for this user' });
     }
-    res.json({ ok: true, organizerId, decision });
+    res.json({ ok: true, userId, decision });
   });
 });

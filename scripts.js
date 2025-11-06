@@ -126,52 +126,48 @@ try{
 async function loginEventOrganizer() {
   const username = document.getElementById('username').value.trim();
   const password = document.getElementById('password').value.trim();
+  if (!username || !password) {
+    alert('Please enter username and password.');
+    return;
+  }
 
   try {
-    const response = await fetch('http://localhost:5000/loginEventOrg', {
+    const res = await fetch('/loginEventOrg', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password })
     });
 
-    if (!response.ok) {
-      const error = await response.text();
-      alert('Login failed: ' + error);
+    if (!res.ok) {
+      const msg = await res.text().catch(()=>'Login failed');
+      alert('Login failed: ' + msg);
       return;
     }
 
-    const org = await response.json();
+    const data = await res.json();
+    const status = data.status ?? 'approved';
 
-    const status = org.status ?? 'approved';
-
-    // Build a normalized organizer object
-    const organizerObj = {
-      organizer_id: org.organizer_id ?? org.user_id ?? null,
-      user_id:      org.user_id      ?? org.organizer_id ?? null,
-      username:     org.username ?? '',
-      first_name:   org.first_name ?? '',
-      last_name:    org.last_name ?? '',
-      email:        org.email ?? '',
-      phone:        org.phone ?? '',
-      address:      org.address ?? '',
-      status:       status,            // 'approved' or 'pending' or 'rejected'
-      role:         'organizer'
+    const organizer = {
+      user_id:    data.user_id,
+      username:   data.username ?? '',
+      first_name: data.first_name ?? '',
+      last_name:  data.last_name ?? '',
+      email:      data.email ?? '',
+      status,
+      role: 'organizer'
     };
+    localStorage.setItem('currentOrganizer', JSON.stringify(organizer));
 
-    // Save info for pages that check organizer status/role
-    localStorage.setItem('currentOrganizer', JSON.stringify(organizerObj));
-
-    // Also keep “currentUser” option
+    // compatibility for teh older pages
     localStorage.setItem('currentUser', JSON.stringify({
-      user_id:     organizerObj.user_id,
-      username:    organizerObj.username,
-      first_name:  organizerObj.first_name,
-      last_name:   organizerObj.last_name,
-      email:       organizerObj.email,
-      role:        'organizer'
+      user_id:    organizer.user_id,
+      username:   organizer.username,
+      first_name: organizer.first_name,
+      last_name:  organizer.last_name,
+      email:      organizer.email,
+      role:       'organizer'
     }));
 
-    // Gate access based on approval
     if (status !== 'approved') {
       alert(`Your organizer account is "${status}". Please wait for admin approval.`);
       return;
@@ -179,7 +175,6 @@ async function loginEventOrganizer() {
 
     alert('Login successful!');
     window.location.href = './create_events.html';
-
   } catch (err) {
     console.error(err);
     alert('Failed to login. Please try again later.');

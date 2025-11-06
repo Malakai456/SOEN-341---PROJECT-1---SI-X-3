@@ -180,6 +180,112 @@ async function loginEventOrganizer() {
     alert('Failed to login. Please try again later.');
   }
 }
+function getLoggedUser() {
+  try {
+    return JSON.parse(localStorage.getItem('currentUser') || 'null'); // { user_id, username } or null
+  } catch {
+    return null;
+  }
+}
+
+function showLoggedUser() {
+  const user = getLoggedUser();
+  const display = document.querySelector('.username-display');
+  const logoutBtn = document.querySelector('.logout-btn');
+
+  if (user) {
+    if (display)  display.textContent = user.username;
+    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+  } else {
+    if (display)  display.textContent = '';
+    if (logoutBtn) logoutBtn.style.display = 'none';
+  }
+}
+
+function logoutUser() {
+  localStorage.removeItem('currentUser');
+  alert('Logged out!');
+  window.location.href = 'login.html';
+}
+
+
+
+
+
+function gotoTicket(data) {
+  console.log("🎟️ gotoTicket from scripts.js:", data);
+  sessionStorage.setItem('lastTicket', JSON.stringify(data));
+  window.location.href = 'ticket.html';
+}
+
+async function buyEvent(event_id, title, details, location, date, time, price) {
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  if (!user) {
+    alert('Please log in first.');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title}"?`);
+  if (!confirmPurchase) return;
+
+  try {
+    console.log('➡️ Starting buyEvent:', { user_id: user.user_id, event_id });
+
+    const res = await fetch('http://localhost:5000/buy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.user_id, event_id })
+    });
+
+    console.log('✅ Fetch completed:', res.status);
+
+    if (!res.ok) {
+      const msg = await res.text();
+      alert('❌ ' + msg);
+      return;
+    }
+
+    const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
+    console.log('🎟️ Created ticket ID:', ticketId);
+
+    const ticketUrl = `${window.location.origin}/verify.html?ticketId=${ticketId}`;
+    console.log('🌐 Ticket URL:', ticketUrl);
+
+    const ticketData = {
+      ticketId,
+      ticketUrl,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      eventName: title,
+      eventDetails: details,
+      eventLocation: location,
+      eventDate: date,
+      eventTime: time,
+      eventPrice: price,
+      eventImage: title?.toLowerCase().replace(/\s+/g, '') + '.png'
+    };
+
+    console.log('📦 Ticket data ready:', ticketData);
+
+    gotoTicket(ticketData);
+    console.log('➡️ Redirecting to ticket page...');
+
+  } catch (err) {
+    console.error('🔥 buyEvent crashed:', err);
+    alert('⚠️ Failed to connect to server.');
+  }
+}
+
+
+
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-event-id]');
+  if (!btn) return;
+  const id = Number(btn.getAttribute('data-event-id'));
+  if (id) buyEvent(id);
+});
+
 
 // --- Pretend login helpers using localStorage ---
 

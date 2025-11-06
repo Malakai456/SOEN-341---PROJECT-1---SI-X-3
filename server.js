@@ -267,6 +267,95 @@ app.get('/api/events', (req, res) => {
     });
 });
 
+
+// BUY EVENT BUTTON API
+app.post('/buy', (req, res) => {
+  const { user_id, event_id } = req.body;
+  console.log('🟢 /buy request received:', req.body);
+
+  if (!user_id || !event_id) {
+    return res.status(400).send('Missing user_id or event_id');
+  }
+
+  const sql = `INSERT INTO bought_tickets (user_id, event_id) VALUES (?, ?)`;
+
+  db.query(sql, [user_id, event_id], (err) => {
+    if (err) {
+      console.error('❌ MySQL error when inserting into bought_tickets:', err);
+      if (err.code === 'ER_DUP_ENTRY') {
+        return res.status(409).send('You already bought a ticket for this event.');
+      }
+      return res.status(500).send('Database error.');
+    }
+
+    res.status(201).send('Ticket successfully recorded!');
+  });
+});
+
+
+app.get('/api/event-analytics', (req, res) => {
+  const query = `
+    SELECT 
+      e.event_id,
+      e.title,
+      e.capacity,
+      COUNT(t.event_id) AS tickets_sold,
+      (e.capacity - COUNT(t.event_id)) AS remaining_capacity
+    FROM newEvents e
+    LEFT JOIN bought_tickets t ON e.event_id = t.event_id
+    GROUP BY e.event_id;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching analytics:', err);
+      return res.status(500).send('Error fetching event analytics');
+    }
+    res.json(results);
+  });
+});
+
+
+//CSV EXPORT
+app.get('/export-csv/:event_id', (req, res) => {
+  const { event_id } = req.params;
+
+  const query = `
+    SELECT 
+      e.title AS event_title,
+      u.first_name, u.last_name, u.email, u.phone, 
+      b.time AS purchase_time
+    FROM bought_tickets b
+    JOIN users u ON b.user_id = u.user_id
+    JOIN newevents e ON b.event_id = e.event_id
+    WHERE b.event_id = ?;
+  `;
+
+  db.query(query, [event_id], (err, rows) => {
+    if (err) {
+      console.error('❌ Error generating CSV:', err);
+      return res.status(500).send('Database error');
+    }
+
+    if (!rows.length) {
+      return res.status(404).send('No attendees found for this event.');
+    }
+
+    // Create CSV string
+    const headers = Object.keys(rows[0]).join(',') + '\n';
+    const values = rows
+      .map(r => Object.values(r).map(v => `"${v}"`).join(','))
+      .join('\n');
+
+    const csvData = headers + values;
+
+    // Set response headers for download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="attendees_event_${event_id}.csv"`);
+    res.send(csvData);
+  });
+});
+
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
 });

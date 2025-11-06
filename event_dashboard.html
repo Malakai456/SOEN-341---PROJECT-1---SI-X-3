@@ -13,15 +13,6 @@
       padding: 0;
     }
 
-    header {
-      background-color: #1b3b6f;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
     header h2 a {
       color: white;
       text-decoration: none;
@@ -89,11 +80,14 @@
 <body>
 
 <header>
-  <h2 class="companyname"><a href="mainpage.html">CampusEvents</a></h2>
+  <h2 class="companyname">
+    <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+  </h2>
   <nav class="navigation">
-    <a href="create_events.html" style="color:white;">Create Event</a>
-    <a href="event_dashboard.html" style="color:white;">Dashboard</a>
-    <a href="logout.html" style="color:white;">Logout</a>
+    <a href="mainpage.html">Home</a>
+    <a href="create_events.html" class="loginbutton">Create Event</a>
+    <a href="event_dashboard.html">Dashboard</a>
+    <a href="logout.html">Logout</a>
   </nav>
 </header>
 
@@ -119,72 +113,120 @@
       <p id="remainingCapacity">0</p>
     </div>
   </div>
+<button id="exportBtn" class="export-btn" disabled>⬇️ Export Analytics (CSV)</button>
 
   <canvas id="eventChart"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src = "scripts.js"></script>
 <script>
-  // Fetch all events from backend
-  fetch("http://localhost:5000/api/events")
-    .then(res => res.json())
-    .then(events => {
-      const select = document.getElementById("eventSelect");
-      select.innerHTML = "";
-      events.forEach(event => {
-        const option = document.createElement("option");
-        option.value = event.event_id;
-        option.textContent = event.title;
-        select.appendChild(option);
-      });
+document.getElementById('exportBtn').addEventListener('click', exportCSV);
+let eventsData = []; 
+let chart;
 
-      // Load stats when selecting an event
-      select.addEventListener("change", () => {
-        const selectedId = select.value;
-        const event = events.find(e => e.event_id == selectedId);
-        if (event) {
-          const issued = event.tickets_sold || 0;
-          const capacity = event.capacity;
-          const attendance = event.attendance_count || 0;
-          const remaining = capacity - issued;
-          const attendanceRate = capacity > 0 ? ((attendance / capacity) * 100).toFixed(1) : 0;
+fetch('http://localhost:5000/api/event-analytics')
+  .then(res => res.json())
+  .then(events => {
+    const select = document.getElementById('eventSelect');
+    const issued = document.getElementById('ticketsIssued');
+    const remaining = document.getElementById('remainingCapacity');
+    const rate = document.getElementById('attendanceRate');
+    const exportBtn = document.getElementById('exportBtn');
 
-          document.getElementById("ticketsIssued").innerText = issued;
-          document.getElementById("attendanceRate").innerText = attendanceRate + "%";
-          document.getElementById("remainingCapacity").innerText = remaining;
+    eventsData = events; 
+    select.innerHTML = '';
 
-          updateChart(issued, remaining, attendance);
-        }
-      });
-    })
-    .catch(err => console.error("Error fetching events:", err));
+    
+    events.forEach(ev => {
+      const opt = document.createElement('option');
+      opt.value = ev.event_id;
+      opt.textContent = ev.title;
+      select.appendChild(opt);
+    });
 
-  // Chart.js for nice visualization
-  let chart;
-  function updateChart(issued, remaining, attendance) {
-    const ctx = document.getElementById("eventChart").getContext("2d");
-    if (chart) chart.destroy();
+    select.addEventListener('change', () => {
+      const selected = events.find(e => e.event_id == select.value);
+      if (selected) {
+        const sold = selected.tickets_sold;
+        const remain = selected.remaining_capacity;
+        const capacity = selected.capacity;
+        const attendanceRate = capacity > 0 ? ((sold / capacity) * 100).toFixed(1) + '%' : '0%';
 
-    chart = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: ["Tickets Issued", "Remaining", "Attendance"],
-        datasets: [{
-          data: [issued, remaining, attendance],
-          backgroundColor: ["#2b4b9a", "#6fa8dc", "#92c47d"]
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: "bottom"
-          }
-        }
+        issued.textContent = sold;
+        remaining.textContent = remain;
+        rate.textContent = attendanceRate;
+
+        updateChart(sold, remain, parseFloat(attendanceRate));
       }
     });
-  }
+
+    exportBtn.disabled = false;
+
+    if (events.length > 0) {
+      select.selectedIndex = 0;
+      select.dispatchEvent(new Event('change'));
+    }
+  })
+  .catch(err => {
+    console.error("Error loading events:", err);
+    document.getElementById('eventSelect').innerHTML =
+      '<option disabled>Error loading events</option>';
+  });
+
+function updateChart(issued, remaining, attendance) {
+  const ctx = document.getElementById("eventChart").getContext("2d");
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Tickets Issued", "Remaining Capacity"],
+      datasets: [{
+        data: [issued, remaining],
+        backgroundColor: ["#2b4b9a", "#6fa8dc"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "bottom" }
+      }
+    }
+  });
+}
+
+function exportCSV() {
+  const select = document.getElementById('eventSelect');
+  const eventId = select.value;
+  const selected = eventsData.find(e => e.event_id == eventId);
+
+ 
+
+  const headers = ["Event Title", "Tickets Issued", "Remaining Capacity", "Attendance Rate"];
+  const sold = selected.tickets_sold;
+  const remain = selected.remaining_capacity;
+  const capacity = selected.capacity;
+  const attendanceRate = capacity > 0 ? ((sold / capacity) * 100).toFixed(1) + '%' : '0%';
+
+  const values = [selected.title, sold, remain, attendanceRate];
+
+  const csvContent = [headers.join(","), values.join(",")].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${selected.title.replace(/\s+/g, '_')}_analytics.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  alert(` CSV exported for "${selected.title}"`);
+}
 </script>
+
 
 </body>
 </html>

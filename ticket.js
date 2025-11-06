@@ -1,10 +1,11 @@
-
 window.gotoTicket = function (data) {
   sessionStorage.setItem('lastTicket', JSON.stringify(data));
-  const u = new URL(location.origin + '/ticket.html');
+  const u = new URL(window.location.origin + '/ticket.html');
   if (data.ticketId) u.searchParams.set('ticketId', data.ticketId);
-  location.href = u.toString();
+  window.location.href = u.toString();
 };
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // 1) Load our ticket object that purchase.js stored

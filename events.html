@@ -45,6 +45,8 @@
 <div class="event-grid" id="eventGrid"></div>
 
 <script src="scripts.js"></script>
+<!-- <script src="ticket.js"></script> -->
+
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 
 <script>
@@ -68,17 +70,21 @@ events.forEach(event => {
     card.setAttribute('data-date', event.date);
     card.setAttribute('data-club', event.location.replace(/\s+/g,''));
     card.innerHTML = `
-        <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
-        <h3>${event.title}</h3>
-        <p><strong>Date:</strong> ${event.date}</p>
-        <p><strong>Time:</strong> ${event.time}</p>
-        <p><strong>Location:</strong> ${event.location}</p>
-        <p>${event.details || ''}</p>
-        <div class="event-footer">
-            <span class="price">$${event.price}</span>
-            <!-- added data-event-id -->
-            <button class="buy-button" data-event-id="${event.id}">Buy</button>
-        </div>
+      <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
+      <h3>${event.title}</h3>
+      <p><strong>Date:</strong> ${event.event_date || event.date}</p>
+      <p><strong>Time:</strong> ${event.event_time || event.time}</p>
+      <p><strong>Location:</strong> ${event.location_name || event.location}</p>
+      <p>${event.description || event.details || ''}</p>
+      <div class="event-footer">
+        <span class="price">$${event.price}</span>
+<button class="buy-button"
+  onclick="buyEvent(${event.event_id}, '${event.title}', '${event.details}', '${event.location}', '${event.date}', '${event.time}', ${event.price})">
+  Buy
+</button>
+
+
+      </div>
     `;
     eventGrid.appendChild(card);
   });

@@ -182,7 +182,7 @@ function logoutUser() {
 
 
 function gotoTicket(data) {
-  console.log("🎟️ gotoTicket from scripts.js:", data);
+
   sessionStorage.setItem('lastTicket', JSON.stringify(data));
   window.location.href = 'ticket.html';
 }
@@ -207,19 +207,18 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       body: JSON.stringify({ user_id: user.user_id, event_id })
     });
 
-    console.log('✅ Fetch completed:', res.status);
+    console.log(' Fetch completed:', res.status);
 
     if (!res.ok) {
       const msg = await res.text();
-      alert('❌ ' + msg);
       return;
     }
 
     const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
-    console.log('🎟️ Created ticket ID:', ticketId);
+  
 
     const ticketUrl = `${window.location.origin}/verify.html?ticketId=${ticketId}`;
-    console.log('🌐 Ticket URL:', ticketUrl);
+   
 
     const ticketData = {
       ticketId,
@@ -235,17 +234,12 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       eventImage: title?.toLowerCase().replace(/\s+/g, '') + '.png'
     };
 
-    console.log('📦 Ticket data ready:', ticketData);
-
     gotoTicket(ticketData);
-    console.log('➡️ Redirecting to ticket page...');
-
   } catch (err) {
-    console.error('🔥 buyEvent crashed:', err);
-    alert('⚠️ Failed to connect to server.');
+    console.error(' buyEvent crashed:', err);
+   
   }
 }
-
 
 
 document.addEventListener('click', (e) => {
@@ -256,3 +250,20 @@ document.addEventListener('click', (e) => {
 });
 
 
+// LOGIN FOR ADMIN
+async function loginAdmin() {
+  const username = document.getElementById('adminUsername').value.trim();
+  const password = document.getElementById('adminPassword').value.trim();
+
+  // Hardcoded 
+  const ADMIN_USER = 'soen341';
+  const ADMIN_PASS = '123';
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    alert('Welcome Admin!');
+    localStorage.setItem('adminLoggedIn', 'true');
+    window.location.href = 'admin.html';
+  } else {
+    alert(' Invalid credentials, try again.');
+  }
+}

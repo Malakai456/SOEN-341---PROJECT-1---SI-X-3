@@ -38,6 +38,7 @@
 <div class="event-grid" id="eventGrid">
 </div>
 <script src="scripts.js"></script>
+<!-- <script src="ticket.js"></script> -->
 
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 <script>
@@ -73,14 +74,12 @@ function displayEvents(eventList) {
       <p>${event.description || event.details || ''}</p>
       <div class="event-footer">
         <span class="price">$${event.price}</span>
-        <button class="buy-button" onclick="buyEvent(
-          '${event.title}',
-          '${event.description || event.details || ''}',
-          '${event.location_name || event.location}',
-          '${event.event_date || event.date}',
-          '${event.event_time || event.time}',
-          ${event.price}
-        )">Buy</button>
+<button class="buy-button"
+  onclick="buyEvent(${event.event_id}, '${event.title}', '${event.details}', '${event.location}', '${event.date}', '${event.time}', ${event.price})">
+  Buy
+</button>
+
+
       </div>
     `;
     eventGrid.appendChild(card);

@@ -10,10 +10,12 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());                      // for JSON fetches
 app.use(express.urlencoded({ extended: true })); // for form POSTs
-app.use(express.static(__dirname,));
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
-    res.send('Server is running!');
+    res.sendFile(path.join(__dirname, 'mainpage.html'));
 });
+
 
 
 
@@ -22,7 +24,7 @@ const db = mysql.createConnection({
     user: 'root', 
     port:'3306',
     password: '', 
-    database: "341_project_SARAH" 
+    database: "341_project_SARA" 
 });
 
 db.connect((err) => {
@@ -368,6 +370,7 @@ app.patch('/api/admin/organizers/:userId', adminGuard, (req, res) => {
     }
     res.json({ ok: true, userId, decision });
   });
+});
 
 // WHEN EVENT ORGANIZER CREATES EVENTS 
 app.post('/api/events', (req, res) => {

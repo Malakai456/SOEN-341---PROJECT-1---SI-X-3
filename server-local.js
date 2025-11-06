@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql = require('mysql2');  // *****
 const express = require('express'); 
 const path = require('path'); // if not already present
 
@@ -164,3 +164,26 @@ app.post('/buy', (req, res) => {
     return res.status(200).json({ ok: true, message: 'Purchase recorded' });
   });
 });
+
+app.get('/admin/users', (req, res) => {
+    db.query('SELECT user_id, username, email, role FROM users', (err, results) => {
+      if (err) return res.status(500).send(err);
+      res.json(results);
+    });
+  });
+
+  app.put('/admin/users/:id/role', (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+    db.query('UPDATE users SET role = ? WHERE user_id = ?', [role, id], (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send('User role updated ');
+    });
+  });
+
+  app.get('/admin/events', (req, res) => {
+    db.query('SELECT * FROM events', (err, results) => {
+      if (err) return res.status(500).send(err);
+      res.json(results);
+    });
+  });

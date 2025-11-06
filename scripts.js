@@ -99,8 +99,8 @@ async function registerEventOrganizer() {
     const email = document.getElementById('email').value.trim();
     const address = document.getElementById('address').value.trim();
 
-    const newEventOrg = { first_name, last_name, username, password, phone, email, address };
-
+    const newEventOrg = { first_name, last_name, username, phone, email, address, password };
+console.log(newEventOrg)
 try{
         
         const response = await fetch('http://localhost:5000/registerEventOrg', {
@@ -111,7 +111,7 @@ try{
 
         if (response.ok) {
             alert('Registration successful!');
-            window.location.href = './loginOrganizer.html';
+            window.location.href = '/loginOrganizer.html';
         } else {
             const error = await response.text();
             alert('Error: ' + error);
@@ -138,10 +138,10 @@ async function loginEventOrganizer() {
             const user = await response.json();
            localStorage.setItem('currentUser', JSON.stringify(user));
            alert('Login successful!');
-          
             window.location.href = './create_events.html';
         } else {
             const error = await response.text();
+            console.log(error)
             alert('Login failed: ' + error);
         }
     } catch (err) {

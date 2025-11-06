@@ -34,9 +34,6 @@ db.connect((err) => {
 });
 
 
-app.listen(PORT, () => {
-    console.log(`Server is running on ${PORT}`);
-});
 
 
 app.post('/register', (req, res) => {
@@ -133,7 +130,7 @@ app.post('/loginEventOrg', (req, res) => {
 
         const user = results[0];
         res.status(200).json({
-            user_id: user.user_id,
+            org_id: user.org_id,
             first_name: user.first_name,
             last_name: user.last_name,
             username: user.username,
@@ -163,4 +160,51 @@ app.post('/buy', (req, res) => {
     }
     return res.status(200).json({ ok: true, message: 'Purchase recorded' });
   });
+});
+
+
+// WHEN EVENT ORGANIZER CREATES EVENTS 
+app.post('/api/events', (req, res) => {
+    const {
+        org_id,
+        title,
+        description,
+        event_date,
+        event_time,
+        location_name,
+        capacity,
+        ticket_policy,
+        price
+    } = req.body;
+
+    const query = `
+        INSERT INTO newEvents 
+        (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    db.query(query, [org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price || 0], (err, result) => {
+        if (err) {
+            console.error('Error inserting event:', err);
+            return res.status(500).send('Error adding event');
+        }
+    
+        res.status(201).send('Event created successfully');
+    });
+});
+
+
+app.get('/api/events', (req, res) => {
+    const query = 'SELECT * FROM newEvents ORDER BY created_at DESC';
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching events:', err);
+            return res.status(500).send('Error fetching events');
+        }
+        res.status(200).json(results);
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on ${PORT}`);
 });

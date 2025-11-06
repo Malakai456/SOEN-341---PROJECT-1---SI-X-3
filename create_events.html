@@ -1,0 +1,265 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Event</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .datetime-group {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .datetime-group .input-text {
+      flex: 1;
+    }
+
+    textarea[name="description"] {
+      width: 100%;
+      height: 50px; /* same height as inputs */
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      resize: none;
+    }
+
+    #priceField {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h2 class="companyname"><a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a></h2>
+  <nav class="navigation">
+    <a href="mainpage.html">Home</a>
+    <a href="create_events.html" class="loginbutton">Create Event</a>
+    <a href="logout.html">Logout</a>
+  </nav>
+</header>
+
+<div class="registerpage">
+  <h1>Create a New Event</h1>
+  <form id="createEventForm">
+    <div class="input-text">
+      <input type="text" name="title" placeholder="Event Title" required>
+    </div>
+
+    <div class="input-text">
+      <textarea name="description" placeholder="Event Description" required></textarea>
+    </div>
+
+    <div class="datetime-group">
+      <div class="input-text">
+        <label>Date</label>
+        <input type="date" name="event_date" required>
+      </div>
+      <div class="input-text">
+        <label>Time</label>
+        <input type="time" name="event_time" required>
+      </div>
+    </div>
+
+    <div class="input-text">
+      <input type="text" name="location_name" placeholder="Location Name" required>
+    </div>
+
+    <div class="input-text">
+      <input type="number" name="capacity" placeholder="Ticket Capacity" min="1" required>
+    </div>
+
+    <div class="input-text">
+      <label>Ticket Type</label>
+      <select name="ticket_policy" id="ticketType" required>
+        <option value="free">Free</option>
+        <option value="paid">Paid</option>
+      </select>
+    </div>
+
+    <div class="input-text" id="priceField">
+      <input type="number" name="price" placeholder="Enter Ticket Price ($)" min="1">
+    </div>
+
+    <button type="submit">Create Event</button>
+  </form>
+  <p id="message"></p>
+</div>
+
+<!--Link to external JS file -->
+<!-- <script src="create_events.js"></script>
+<script src="scripts.js"></script>
+</body>
+</html> --> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Event</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* --- LAYOUT --- */
+    body {
+      background: linear-gradient(120deg, #eaf1ff, #f7fbff);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .form-wrapper {
+      width: 70%;
+      margin: 50px auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #1b3b6f;
+      margin-bottom: 25px;
+    }
+
+    .input-text {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #2b4b9a;
+    }
+
+    input, textarea, select {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+    }
+
+    textarea { resize: none; height: 60px; }
+
+    button {
+      background: #1b3b6f;
+      color: white;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
+    }
+
+    button:hover { background: #356ac3; }
+
+    .datetime-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    #priceField { display: none; }
+
+    /* --- EVENT PREVIEW --- */
+    #previewBox {
+      display: none;
+      margin-top: 35px;
+      padding: 20px;
+      background: #f0f6ff;
+      border-radius: 12px;
+      border-left: 5px solid #2b4b9a;
+    }
+
+    #previewBox h2 {
+      color: #2b4b9a;
+    }
+
+    #previewBox p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h2 class="companyname">
+    <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+  </h2>
+  <nav class="navigation">
+    <a href="mainpage.html">Home</a>
+    <a href="create_events.html" class="loginbutton">Create Event</a>
+    <a href="event_dashboard.html">Dashboard</a>
+    <a href="logout.html">Logout</a>
+  </nav>
+</header>
+
+<div class="form-wrapper">
+  <h1>Create a New Event</h1>
+  <form id="createEventForm">
+    <div class="input-text">
+      <label>Event Title</label>
+      <input type="text" name="title" placeholder="Ex: Hackathon 2025" required>
+    </div>
+
+    <div class="input-text">
+      <label>Description</label>
+      <textarea name="description" placeholder="Briefly describe your event" required></textarea>
+    </div>
+
+    <div class="datetime-group">
+      <div class="input-text">
+        <label>Date</label>
+        <input type="date" name="event_date" required>
+      </div>
+      <div class="input-text">
+        <label>Time</label>
+        <input type="time" name="event_time" required>
+      </div>
+    </div>
+
+    <div class="input-text">
+      <label>Location</label>
+      <input type="text" name="location_name" placeholder="Ex: Engineering Hall A" required>
+    </div>
+
+    <div class="input-text">
+      <label>Ticket Capacity</label>
+      <input type="number" name="capacity" placeholder="Total available tickets" min="1" required>
+    </div>
+
+    <div class="input-text">
+      <label>Ticket Type</label>
+      <select name="ticket_policy" id="ticketType" required>
+        <option value="">Select Type</option>
+        <option value="free">Free</option>
+        <option value="paid">Paid</option>
+      </select>
+    </div>
+
+    <div class="input-text" id="priceField">
+      <label>Ticket Price ($)</label>
+      <input type="number" name="price" min="1" placeholder="Enter price if paid">
+    </div>
+
+    <button type="submit">Create Event</button>
+  </form>
+
+  <div id="previewBox">
+    <h2>Preview:</h2>
+    <p><strong>Title:</strong> <span id="pTitle"></span></p>
+    <p><strong>Description:</strong> <span id="pDesc"></span></p>
+    <p><strong>Date:</strong> <span id="pDate"></span></p>
+    <p><strong>Time:</strong> <span id="pTime"></span></p>
+    <p><strong>Location:</strong> <span id="pLocation"></span></p>
+    <p><strong>Capacity:</strong> <span id="pCapacity"></span></p>
+    <p><strong>Ticket Type:</strong> <span id="pType"></span></p>
+    <p><strong>Price:</strong> $<span id="pPrice"></span></p>
+  </div>
+
+  <p id="message"></p>
+</div>
+
+<script src="create_events.js"></script>
+</body>
+</html>

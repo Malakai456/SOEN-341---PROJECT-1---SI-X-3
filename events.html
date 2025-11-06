@@ -80,7 +80,22 @@ events.forEach(event => {
         </div>
     `;
     eventGrid.appendChild(card);
-});
+  });
+
+
+displayEvents(events);
+
+fetch("http://localhost:5000/api/events")
+  .then(res => res.json())
+  .then(newEvents => {
+    displayEvents(newEvents);
+
+    if (newEvents.length > 0) {
+      document.getElementById('messageBox').innerHTML = 
+        `<p style="color:green;text-align:center;">${newEvents.length} new event(s) added by organizers!</p>`;
+    }
+  })
+  .catch(err => console.error("Error loading events:", err));
 
 const mixer = mixitup('#eventGrid', {
     selectors: { target: '.mix' },

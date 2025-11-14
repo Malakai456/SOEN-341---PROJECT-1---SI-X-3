@@ -49,14 +49,15 @@
 </form>
 </div>
 
-<!-- (Optional) your team’s shared JS; keep it if they need it elsewhere -->
 <script src="scripts.js"></script>
 
-<!-- Robust, self-contained login logic -->
-<script>
-(function () {
-  const form = document.getElementById('loginForm');
-  const btn  = document.getElementById('loginBtn');
+    <div class="business">
+        <p>Event Organizer? <a href ="loginOrganizer.html">LogIn</a> <a href= "registerOrganizer.html" > Sign Up</a></p>
+    </div>
+
+  <div class="admin">
+        <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
+    </div>
 
   // Only use fetch when running from http(s). If opened via file://, let the form submit normally.
   const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
@@ -91,7 +92,6 @@
       localStorage.setItem('loggedUser', JSON.stringify(data.user));
       window.location.href = 'events.html';
     } catch (err) {
-      alert('❌ ' + (err.message || 'Login failed'));
     } finally {
       setLoading(false);
     }

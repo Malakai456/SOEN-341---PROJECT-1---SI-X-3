@@ -213,7 +213,7 @@ function logoutUser() {
 
 
 function gotoTicket(data) {
-  console.log("🎟️ gotoTicket from scripts.js:", data);
+
   sessionStorage.setItem('lastTicket', JSON.stringify(data));
   window.location.href = 'ticket.html';
 }
@@ -238,19 +238,18 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       body: JSON.stringify({ user_id: user.user_id, event_id })
     });
 
-    console.log('✅ Fetch completed:', res.status);
+    console.log(' Fetch completed:', res.status);
 
     if (!res.ok) {
       const msg = await res.text();
-      alert('❌ ' + msg);
       return;
     }
 
     const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
-    console.log('🎟️ Created ticket ID:', ticketId);
+  
 
     const ticketUrl = `${window.location.origin}/verify.html?ticketId=${ticketId}`;
-    console.log('🌐 Ticket URL:', ticketUrl);
+   
 
     const ticketData = {
       ticketId,
@@ -266,17 +265,12 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       eventImage: title?.toLowerCase().replace(/\s+/g, '') + '.png'
     };
 
-    console.log('📦 Ticket data ready:', ticketData);
-
     gotoTicket(ticketData);
-    console.log('➡️ Redirecting to ticket page...');
-
   } catch (err) {
-    console.error('🔥 buyEvent crashed:', err);
-    alert('⚠️ Failed to connect to server.');
+    console.error(' buyEvent crashed:', err);
+   
   }
 }
-
 
 
 document.addEventListener('click', (e) => {
@@ -287,71 +281,20 @@ document.addEventListener('click', (e) => {
 });
 
 
-// --- Pretend login helpers using localStorage ---
+// LOGIN FOR ADMIN
+async function loginAdmin() {
+  const username = document.getElementById('adminUsername').value.trim();
+  const password = document.getElementById('adminPassword').value.trim();
 
-function getLoggedUser() {
-  try {
-    return JSON.parse(localStorage.getItem('loggedUser') || 'null'); // { user_id, username } or null
-  } catch {
-    return null;
-  }
-}
+  // Hardcoded 
+  const ADMIN_USER = 'soen341';
+  const ADMIN_PASS = '123';
 
-function showLoggedUser() {
-  const user = getLoggedUser();
-  const display = document.querySelector('.username-display');
-  const logoutBtn = document.querySelector('.logout-btn');
-
-  if (user) {
-    if (display)  display.textContent = user.username;
-    if (logoutBtn) logoutBtn.style.display = 'inline-block';
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    alert('Welcome Admin!');
+    localStorage.setItem('adminLoggedIn', 'true');
+    window.location.href = 'admin.html';
   } else {
-    if (display)  display.textContent = '';
-    if (logoutBtn) logoutBtn.style.display = 'none';
+    alert(' Invalid credentials, try again.');
   }
 }
-
-function logoutUser() {
-  localStorage.removeItem('loggedUser');
-  alert('Logged out!');
-  window.location.href = 'login.html';
-}
-
-// --- Buy handler (minimal; uses existing buttons with data-event-id) ---
-async function buyEvent(event_id) {
-  const user = getLoggedUser();
-  if (!user) {
-    alert('Please log in first.');
-    window.location.href = 'login.html';
-    return;
-  }
-
-  try {
-    const res = await fetch('/buy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: user.user_id, event_id })
-    });
-
-    if (!res.ok) {
-      const t = await res.text();
-      alert('❌ ' + t);
-      return;
-    }
-
-    alert('✅ Purchase recorded!');
-  } catch (err) {
-    alert('⚠️ Network error: ' + err.message);
-  }
-}
-
-// Delegated listener (so we don't touch teammates' markup)
-// Any element with [data-event-id] will trigger a buy
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-event-id]');
-  if (!btn) return;
-  const idStr = btn.getAttribute('data-event-id');
-  const eventId = Number(idStr);
-  if (eventId) buyEvent(eventId);
-});
-

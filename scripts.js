@@ -124,30 +124,61 @@ try{
 
 
 async function loginEventOrganizer() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) {
+    alert('Please enter username and password.');
+    return;
+  }
 
-    try {
-        const response = await fetch('http://localhost:5000/loginEventOrg', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
+  try {
+    const res = await fetch('/loginEventOrg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
 
-        if (response.ok) {
-            const user = await response.json();
-           localStorage.setItem('currentUser', JSON.stringify(user));
-           alert('Login successful!');
-            window.location.href = './create_events.html';
-        } else {
-            const error = await response.text();
-            console.log(error)
-            alert('Login failed: ' + error);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Failed to login. Please try again later.');
+    if (!res.ok) {
+      const msg = await res.text().catch(()=>'Login failed');
+      alert('Login failed: ' + msg);
+      return;
     }
+
+    const data = await res.json();
+    const status = data.status ?? 'approved';
+
+    const organizer = {
+      user_id:    data.user_id,
+      username:   data.username ?? '',
+      first_name: data.first_name ?? '',
+      last_name:  data.last_name ?? '',
+      email:      data.email ?? '',
+      status,
+      role: 'organizer'
+    };
+    localStorage.setItem('currentOrganizer', JSON.stringify(organizer));
+
+    // compatibility for teh older pages
+    localStorage.setItem('currentUser', JSON.stringify({
+      user_id:    organizer.user_id,
+      username:   organizer.username,
+      first_name: organizer.first_name,
+      last_name:  organizer.last_name,
+      email:      organizer.email,
+      role:       'organizer'
+    }));
+
+    if (status !== 'approved') {
+      alert(`Your organizer account is "${status}". Please wait for admin approval.`);
+      return;
+    }
+
+    alert('Login successful!');
+    window.location.href = './create_events.html';
+  } catch (err) {
+    console.error(err);
+    alert('Failed to login. Please try again later.');
+  }
 }
 function getLoggedUser() {
   try {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 11, 2025 at 05:55 AM
+-- Generation Time: Nov 06, 2025 at 03:16 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -48,15 +48,16 @@ CREATE TABLE `events` (
   `ends_at` datetime NOT NULL,
   `capacity` int(10) UNSIGNED NOT NULL,
   `ticket_policy` enum('free','paid_mock') NOT NULL DEFAULT 'free',
-  `created_at` datetime NOT NULL DEFAULT current_timestamp()
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `moderation_status` enum('pending','flagged','approved','needs_revision','removed') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `events`
 --
 
-INSERT INTO `events` (`event_id`, `org_id`, `location_id`, `title`, `description`, `starts_at`, `ends_at`, `capacity`, `ticket_policy`, `created_at`) VALUES
-(45, NULL, NULL, 'Hackathon 2025', '24-hour coding challenge!', '2025-12-15 08:00:00', '2025-12-15 20:00:00', 100, 'free', '2025-10-10 16:49:11');
+INSERT INTO `events` (`event_id`, `org_id`, `location_id`, `title`, `description`, `starts_at`, `ends_at`, `capacity`, `ticket_policy`, `created_at`, `moderation_status`) VALUES
+(45, NULL, NULL, 'Hackathon 2025', '24-hour coding challenge!', '2025-12-15 08:00:00', '2025-12-15 20:00:00', 100, 'free', '2025-10-10 16:49:11', 'approved');
 
 -- --------------------------------------------------------
 
@@ -151,7 +152,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`user_id`, `email`, `username`, `password_hash`, `first_name`, `last_name`, `created_at`, `google_access_token`, `google_refresh_token`) VALUES
-(1, 'test@gmail.com', 'testuser', '12345', 'Test', 'User', '2025-10-10 15:52:19', 'Your_Google_AccessToken', NULL);
+(1, 'test@gmail.com', 'testuser', '12345', 'Test', 'User', '2025-10-10 15:52:19', 'example', NULL);
 
 --
 -- Indexes for dumped tables

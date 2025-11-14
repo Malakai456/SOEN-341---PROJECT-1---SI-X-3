@@ -101,6 +101,113 @@ app.post('/loginEventOrg', async (req, res) => {
   }
 });
 
+// === BUY: insert into event_buys (user_id, event_id, time) ===
+// expects JSON: { user_id, event_id }
+app.post('/buy', (req, res) => {
+  let { user_id, event_id } = req.body;
+
+  user_id  = Number(user_id);
+  event_id = Number(event_id);
+  if (!user_id || !event_id) return res.status(400).send('Invalid payload');
+
+  // NOTE: time column is named `time` (quote it)
+  const sql = 'INSERT INTO event_buys (user_id, event_id, `time`) VALUES (?, ?, NOW())';
+
+  db.query(sql, [user_id, event_id], (err) => {
+    if (err) {
+      console.error('❌ /buy SQL error:', err.code, err.sqlMessage);
+      return res.status(500).send('Database error');
+    }
+    return res.status(200).json({ ok: true, message: 'Purchase recorded' });
+  });
+});
+
+app.get('/admin/users', (req, res) => {
+    const query = 'SELECT * FROM users';
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching users');
+        res.json(results);
+    });
+});
+
+app.get('/admin/organizations', (req, res) => {
+    const query = 'SELECT * FROM organizations';
+    db.query(query, (err, results) => {
+        if (err) return res.status(500).send('Error fetching organizations');
+        res.json(results);
+    });
+});
+
+  app.put('/admin/users/:id/role', (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body;
+    db.query('UPDATE users SET role = ? WHERE user_id = ?', [role, id], (err, result) => {
+      if (err) return res.status(500).send(err);
+      res.send('User role updated ');
+    });
+  });
+
+  app.delete('/admin/users/:id', (req, res) => {
+    const userId = req.params.id;
+    const query = 'DELETE FROM users WHERE user_id = ?';
+    db.query(query, [userId], (err, result) => {
+        if (err) return res.status(500).send('Error deleting user');
+        res.send('User deleted successfully');
+    });
+});
+ 
+
+app.get('/admin/events/flagged', (req, res) => {
+  const sql = `
+    SELECT
+      e.event_id,
+      e.title,
+      e.description,
+      e.starts_at,
+      e.ends_at,
+      e.capacity,
+      e.ticket_policy,
+      e.moderation_status,
+      o.org_name AS organization_name,
+      l.name AS location_name
+    FROM events e
+    LEFT JOIN organizations o ON e.org_id = o.org_id
+    LEFT JOIN locations l ON e.location_id = l.location_id
+    WHERE e.moderation_status = 'flagged'
+    ORDER BY e.starts_at ASC, e.created_at DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({ message: 'Database error fetching flagged events' });
+    }
+    res.json(results || []);
+  });
+});
+
+app.patch('/admin/events/:eventId/moderation', (req, res) => {
+  const eventId = Number(req.params.eventId);
+  const { action } = req.body || {};
+
+  if (!Number.isInteger(eventId) || eventId <= 0) {
+    return res.status(400).json({ message: 'Invalid event id' });
+  }
+
+  if (!action || !ACTION_TO_STATUS[action]) {
+    return res.status(400).json({ message: 'Invalid moderation action' });
+  }
+
+  const newStatus = ACTION_TO_STATUS[action];
+
+  if (!MODERATION_STATUSES.includes(newStatus)) {
+    return res.status(400).json({ message: 'Unsupported moderation status' });
+  }
+
+  const updateSql = `
+    UPDATE events
+    SET moderation_status = ?
+    WHERE event_id = ?
+  `;
 
 // EVENT CREATION + RETRIEVAL
 app.post('/api/events', async (req, res) => {

@@ -228,15 +228,42 @@ app.put('/api/approve-organizer/:id', async (req, res) => {
   }
 });
 
-app.get('/api/events/moderate', async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM newevents WHERE status = 'pending'");
+// app.get('/api/events/moderate', async (req, res) => {
+//   try {
+//     const [rows] = await db.query("SELECT * FROM newevents WHERE status = 'pending'");
+//     res.json(rows);
+//   } catch (err) {
+//     console.error(' Error', err);
+//     res.status(500).send(err.message);
+//   }
+// });
+
+app.get('/api/events/moderate', (req, res) => {
+  const sql = `
+    SELECT 
+      e.event_id,
+      e.title,
+      e.status,
+      e.org_id,
+      o.first_name,
+      o.last_name,
+      CONCAT(o.first_name, ' ', o.last_name) AS organizer_name
+    FROM newevents e
+    JOIN event_organizers o 
+      ON e.org_id = o.org_id
+    WHERE e.status = 'pending';
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error(" Error", err);
+      return res.status(500).send("Database error");
+    }
+
     res.json(rows);
-  } catch (err) {
-    console.error(' Error', err);
-    res.status(500).send(err.message);
-  }
+  });
 });
+
 
 app.put('/api/events/approve/:id', async (req, res) => {
   try {
@@ -253,6 +280,52 @@ app.delete('/api/events/delete/:id', async (req, res) => {
     res.send('Event deleted!');
   } catch (err) {
     res.status(500).send(err.message);
+  }
+});
+
+
+// Global stats for Admin Dashboard
+app.get("/api/admin/stats", async (req, res) => {
+  try {
+    const [totalsRows] = await db.query(`
+      SELECT
+        (SELECT COUNT(*) FROM newevents) AS total_events,
+        (SELECT COUNT(*) FROM bought_tickets) AS total_tickets_sold,
+        (SELECT COUNT(*) FROM event_organizers WHERE approved = 1) AS total_organizers
+    `);
+
+    const [avgRows] = await db.query(`
+      SELECT AVG(rate) AS avg_attendance_rate
+      FROM (
+        SELECT
+          e.event_id,
+          e.capacity,
+          COALESCE(bt.sold, 0) AS sold,
+          CASE
+            WHEN e.capacity > 0 THEN (COALESCE(bt.sold, 0) / e.capacity) * 100
+            ELSE NULL
+          END AS rate
+        FROM newevents e
+        LEFT JOIN (
+          SELECT event_id, COUNT(*) AS sold
+          FROM bought_tickets
+          GROUP BY event_id
+        ) bt ON e.event_id = bt.event_id
+      ) x
+      WHERE rate IS NOT NULL
+    `);
+
+    const totals = totalsRows[0];
+    const avg = avgRows[0]?.avg_attendance_rate || 0;
+
+    res.json({
+      total_events: Number(totals.total_events || 0),
+      total_tickets_sold: Number(totals.total_tickets_sold || 0),
+      total_organizers: Number(totals.total_organizers || 0),
+      avg_attendance_rate: Number(avg.toFixed(1))
+    });
+  } catch (err) {
+    res.status(500).send("Database error.");
   }
 });
 

@@ -26,7 +26,11 @@
 </header>
 
 <main>
+
+
   <h1>Administrator Dashboard</h1>
+
+
 
   <h2>Pending Organizer Approvals</h2>
   <table id="organizerTable">
@@ -39,10 +43,18 @@
   <h2>Event Moderation</h2>
   <table id="eventTable">
     <thead>
-      <tr><th>Title</th><th>Organizer</th><th>Status</th><th>Action</th></tr>
+      <tr><th>Title</th><th>Status</th><th>Action</th></tr>
     </thead>
     <tbody></tbody>
   </table>
+
+      <h2>Global Platform Statistics</h2>
+<div id="globalStats" class="stat-cards">
+  <div class="stat-card"><h3>Total Events</h3><p id="totalEvents">0</p></div>
+  <div class="stat-card"><h3>Total Tickets Sold</h3><p id="totalTickets">0</p></div>
+  <div class="stat-card"><h3>Total Organizers</h3><p id="totalOrganizers">0</p></div>
+  <div class="stat-card"><h3>Average Attendance Rate</h3><p id="avgAttendance">0%</p></div>
+</div>
 </main>
 
 <script>
@@ -82,7 +94,6 @@ fetch('http://localhost:5000/api/events/moderate')
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${ev.title}</td>
-        <td>${ev.organizer_name}</td>
         <td>${ev.status}</td>
         <td>
           <button style="background:green" onclick="approveEvent(${ev.event_id})">Approve</button>
@@ -103,6 +114,19 @@ function deleteEvent(eventId) {
       .then(res => res.text())
       .then(msg => { alert(msg); location.reload(); });
 }
+// Load global platform statistics
+fetch('http://localhost:5000/api/admin/stats')
+  .then(res => res.json())
+  .then(stats => {
+    document.getElementById('totalEvents').textContent     = stats.total_events || 0;
+    document.getElementById('totalTickets').textContent    = stats.total_tickets_sold || 0;
+    document.getElementById('totalOrganizers').textContent = stats.total_organizers || 0;
+    document.getElementById('avgAttendance').textContent   =
+      stats.avg_attendance_rate ? stats.avg_attendance_rate + "%" : "0%";
+  })
+  .catch(err => console.error("Error loading admin stats:", err));
+
+
 </script>
 
 </body>

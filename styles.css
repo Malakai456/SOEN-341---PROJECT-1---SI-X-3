@@ -88,19 +88,19 @@ button:hover {
     transform: scale(1.05);
 }
 
-.register, .business {
+.register, .business , .admin{
     margin-top: 15px;
     font-size: 14px;
 }
 
-.register a, .business a {
+.register a, .business a, .admin a {
     color: #1c5edd;
     font-weight: bold;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.register a:hover, .business a:hover {
+.register a:hover, .business a:hover , .admin a:hover {
     color: #154bb5;
 }
 
@@ -396,7 +396,7 @@ section {
 #calendar {
   position:center;
   text-align: center;
-  margin-top: 100px;
+  background: #0d1d34ad;
   color:#f5f7fa;
   font-size: 36px;
   text-shadow: 2px 2px 15px rgba(0,0,0,0.8);

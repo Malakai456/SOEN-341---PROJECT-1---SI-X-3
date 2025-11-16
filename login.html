@@ -49,6 +49,7 @@
 </form>
 </div>
 
+
 <script src="scripts.js"></script>
 
     <div class="business">
@@ -92,6 +93,7 @@
       localStorage.setItem('loggedUser', JSON.stringify(data.user));
       window.location.href = 'events.html';
     } catch (err) {
+      alert(  (err.message || 'Login failed'));
     } finally {
       setLoading(false);
     }

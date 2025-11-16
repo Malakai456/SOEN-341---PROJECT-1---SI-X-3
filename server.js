@@ -156,7 +156,6 @@ app.get('/admin/organizations', (req, res) => {
     });
 });
  
-// === Admin moderation endpoints ===
 
 app.get('/admin/events/flagged', (req, res) => {
   const sql = `
@@ -180,7 +179,6 @@ app.get('/admin/events/flagged', (req, res) => {
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('❌ /admin/events/flagged SQL error:', err.code, err.sqlMessage || err.message);
       return res.status(500).json({ message: 'Database error fetching flagged events' });
     }
     res.json(results || []);

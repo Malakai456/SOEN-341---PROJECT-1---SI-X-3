@@ -103,18 +103,75 @@ app.post('/loginEventOrg', async (req, res) => {
 
 
 // EVENT CREATION + RETRIEVAL
-app.post('/api/events', async (req, res) => {
-  const { org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price } = req.body;
+// app.post('/api/events', async (req, res) => {
+//   const { org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price } = req.body;
+//   try {
+//     await db.query(
+//       `INSERT INTO newEvents (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price)
+//        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+//       [org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price || 0]
+//     );
+//     res.status(201).send('Event created successfully');
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send('Error adding event');
+//   }
+// });
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname); // unique filename
+  }
+});
+
+const upload = multer({ storage });
+
+app.post("/api/events", upload.single("image"), async (req, res) => {
   try {
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+
+    const {
+      org_id,
+      title,
+      description,
+      event_date,
+      event_time,
+      location_name,
+      capacity,
+      ticket_policy,
+      price
+    } = req.body;
+
+    const image_url = req.file
+      ? `/uploads/${req.file.filename}`
+      : null;
+
     await db.query(
-      `INSERT INTO newEvents (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price || 0]
+      `INSERT INTO newEvents 
+      (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        org_id,
+        title,
+        description,
+        event_date,
+        event_time,
+        location_name,
+        capacity,
+        ticket_policy,
+        price || 0,
+        image_url
+      ]
     );
-    res.status(201).send('Event created successfully');
+
+    res.status(201).send("Event created successfully");
   } catch (err) {
     console.error(err);
-    res.status(500).send('Error adding event');
+    res.status(500).send(" Error adding event");
   }
 });
 

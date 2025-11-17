@@ -228,15 +228,6 @@ app.put('/api/approve-organizer/:id', async (req, res) => {
   }
 });
 
-// app.get('/api/events/moderate', async (req, res) => {
-//   try {
-//     const [rows] = await db.query("SELECT * FROM newevents WHERE status = 'pending'");
-//     res.json(rows);
-//   } catch (err) {
-//     console.error(' Error', err);
-//     res.status(500).send(err.message);
-//   }
-// });
 
 app.get('/api/events/moderate', (req, res) => {
   const sql = `

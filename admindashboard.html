@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <style>
+   
+  </style>
+</head>
+<body>
+  <h1> Admin Dashboard </h1>
+
+  <h2>Manage Users</h2>
+  <table id="userTable">
+    <tr><th>Username</th><th>Email</th><th>Role</th></tr>
+  </table>
+
+  <h2>Manage Events</h2>
+  <table id="eventTable">
+    <tr><th>Event Title</th><th>Date</th><th>Price</th></tr>
+  </table> 
+
+  <script>
+
+function loadUsers() {
+  fetch('/admin/users')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('output').innerHTML =
+        `<h3>Users:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    });
+}
+  async function updateRole(id, role) {
+    await fetch(`/admin/users/${id}/role`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role })
+    });
+    
+  }
+
+  function loadOrganizations() {
+  fetch('/admin/organizations')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('output').innerHTML =
+        `<h3>Organizations:</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+    });
+}
+
+  </script>
+
+</body>
+</html>
+ 

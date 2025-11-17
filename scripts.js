@@ -158,7 +158,6 @@ async function loginEventOrganizer() {
     };
     localStorage.setItem('currentOrganizer', JSON.stringify(organizer));
 
-    // compatibility for teh older pages
     localStorage.setItem('currentUser', JSON.stringify({
       user_id:    organizer.user_id,
       username:   organizer.username,
@@ -230,8 +229,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
   if (!confirmPurchase) return;
 
   try {
-    console.log('➡️ Starting buyEvent:', { user_id: user.user_id, event_id });
-
+   
     const res = await fetch('http://localhost:5000/buy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

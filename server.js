@@ -7,6 +7,8 @@ const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+// app.use("/uploads", express.static("uploads"));
+
 
 let db;
 (async () => {
@@ -118,9 +120,29 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
+
 app.get('/api/events', async (req, res) => {
   try {
-    const [results] = await db.query('SELECT * FROM newEvents ORDER BY created_at DESC');
+const [results] = await db.query(`
+  SELECT 
+    event_id,
+    org_id,
+    title,
+    description,
+    COALESCE(image, "") AS image,
+    DATE(event_date) AS event_date,
+    event_time,
+    location_name,
+    capacity,
+    ticket_policy,
+    CAST(price AS DECIMAL(10,2)) AS price,
+    COALESCE(tickets_sold, 0) AS tickets_sold,
+    COALESCE(attendance_count, 0) AS attendance_count,
+    created_at,
+    status
+  FROM newevents
+  ORDER BY created_at DESC
+`);
     res.json(results);
   } catch (err) {
     console.error(err);

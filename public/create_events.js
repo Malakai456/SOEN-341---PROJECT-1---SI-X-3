@@ -4,6 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const ticketType = document.getElementById("ticketType");
   const priceField = document.getElementById("priceField");
   const message = document.getElementById("message");
+    const imageUpload = document.getElementById("eventImageUpload");
+  const preview = document.getElementById("imagePreview");
 
   ticketType.addEventListener("change", () => {
     if (ticketType.value === "paid") {
@@ -12,6 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       priceField.style.display = "none";
       priceField.querySelector("input").removeAttribute("required");
+    }
+  });
+
+    imageUpload.addEventListener("change", () => {
+    const file = imageUpload.files[0];
+    if (file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
     }
   });
 
@@ -44,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => {
         console.error(err);
-        message.innerText = "❌ Error submitting event.";
+        message.innerText = "Error submitting event.";
       });
   });
 });

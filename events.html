@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +11,7 @@
   <h2 class="companyname">
     <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
   </h2>
-    <nav class="navigation">
+  <nav class="navigation">
     <a href="mainpage.html">Home</a>
     <a href="contact.html">Contact</a>
     <a href="calendar.html">My Calendar</a>
@@ -42,97 +41,105 @@
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 
 <script>
-const eventGrid = document.getElementById('eventGrid');
-let events = []; 
-
+let events = [];
+const eventGrid   = document.getElementById("eventGrid");
+const filterType  = document.getElementById("filterType");
+const filterValue = document.getElementById("filterValue");
 
 function displayEvents(eventList) {
-  eventGrid.innerHTML = ''; 
+  eventGrid.innerHTML = "";
 
-  eventList.forEach(event => {
-    const card = document.createElement('div');
-    card.classList.add('event-card', 'mix', event.location_name.replace(/\s+/g, ''));
-    card.setAttribute('data-price', event.price);
-    card.setAttribute('data-date', event.event_date);
-    card.setAttribute('data-club', event.location_name.replace(/\s+/g, ''));
+  eventList.forEach(e => {
 
+    const cleanDate  = e.event_date?.split("T")[0] ?? e.event_date;
+    const cleanPrice = Number(e.price).toFixed(2);
+    const clubClass  = e.location_name.replace(/\s+/g,"");
+
+    const imgSrc = (e.image && e.image !== "NULL")
+      ? e.image
+      : "https://via.placeholder.com/350x200?text=Event";
+
+    const card = document.createElement("div");
+    card.classList.add("event-card", "mix", clubClass);
+    card.setAttribute("data-price", cleanPrice);
+    card.setAttribute("data-date", cleanDate);
+    card.setAttribute("data-club", clubClass);
 
     card.innerHTML = `
-<img src="${
-    event.image
-      ? event.image
-      : event.image_url
-        ? `http://localhost:5000${encodeURI(event.image_url)}`
-        : 'images/default.png'
-}">
+      <img src="${imgSrc}" alt="${e.title}">
+      <h3>${e.title}</h3>
+      <p><strong>Date:</strong> ${cleanDate}</p>
+      <p><strong>Time:</strong> ${e.event_time}</p>
+      <p><strong>Location:</strong> ${e.location_name}</p>
+      <p>${e.description ?? ""}</p>
 
-
-      <h3>${event.title}</h3>
-      <p><strong>Date:</strong> ${event.event_date}</p>
-      <p><strong>Time:</strong> ${event.event_time}</p>
-      <p><strong>Location:</strong> ${event.location_name}</p>
-      <p>${event.description || ''}</p>
       <div class="event-footer">
-        <span class="price">$${event.price}</span>
+        <span class="price">$${cleanPrice}</span>
         <button class="buy-button"
-          onclick="buyEvent(${event.event_id}, '${event.title}', '${event.description}', '${event.location_name}', '${event.event_date}', '${event.event_time}', ${event.price})">
-          Buy
-        </button>
+          onclick="buyEvent(${e.event_id})">Buy</button>
       </div>
     `;
+
     eventGrid.appendChild(card);
   });
+
+  mixer.forceRefresh();
 }
 
 fetch("http://localhost:5000/api/events")
   .then(res => res.json())
   .then(data => {
     events = data;
-    if (events.length > 0) {
-      displayEvents(events);
-      document.getElementById('messageBox').innerHTML = 
-        `<p style="color:green;text-align:center;">${events.length} event(s) available!</p>`;
-      updateFilterOptions();
-    } else {
-      document.getElementById('messageBox').innerHTML = 
-        `<p style="color:red;text-align:center;">No events found.</p>`;
-    }
-  })
-  .catch(err => {
-    console.error("Error loading events:", err);
-    document.getElementById('messageBox').textContent = "Could not load events.";
+    displayEvents(events);
+    updateFilterOptions();
   });
 
-const mixer = mixitup('#eventGrid', {
-  selectors: { target: '.mix' },
-  animation: { duration: 300 }
+const mixer = mixitup("#eventGrid", {
+  selectors: { target: ".mix" },
+  animation: { duration: 250 }
 });
 
-const filterType = document.getElementById('filterType');
-const filterValue = document.getElementById('filterValue');
-
 function updateFilterOptions() {
-  filterValue.innerHTML = '';
+  filterValue.innerHTML = "";
   const type = filterType.value;
-  let uniqueOptions = [];
+  let opts = [];
 
-  if (type === 'club') uniqueOptions = [...new Set(events.map(e => e.location_name))];
-  if (type === 'price') uniqueOptions = [...new Set(events.map(e => e.price))];
-  if (type === 'date') uniqueOptions = [...new Set(events.map(e => e.event_date))];
+  if (type === "club") {
+    opts = [...new Set(events.map(e => e.location_name))];
+  }
+
+  if (type === "price") {
+    opts = [...new Set(events.map(e => Number(e.price).toFixed(2)))];
+  }
+
+  if (type === "date") {
+    opts = [...new Set(events.map(e =>
+      e.event_date.split("T")[0]
+    ))];
+  }
 
   filterValue.innerHTML = `<option value="all">All</option>`;
-  uniqueOptions.forEach(opt => {
-    const option = document.createElement('option');
-    option.value = type === 'club' ? '.' + opt.replace(/\s+/g, '') : `[data-${type}='${opt}']`;
-    option.textContent = opt;
+
+  opts.forEach(o => {
+    const option = document.createElement("option");
+
+    option.value =
+      type === "club"
+        ? "." + o.replace(/\s+/g, "")          
+        : `[data-${type}='${o}']`;            
+
+    option.textContent = o;
     filterValue.appendChild(option);
   });
 
-  mixer.filter('all');
+  mixer.filter("all");
 }
 
-filterType.addEventListener('change', updateFilterOptions);
-filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
+
+filterType.addEventListener("change", updateFilterOptions);
+filterValue.addEventListener("change", () =>
+  mixer.filter(filterValue.value === "all" ? "all" : filterValue.value)
+);
 </script>
 
 </body>

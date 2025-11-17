@@ -7,6 +7,8 @@ const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+// app.use("/uploads", express.static("uploads"));
+
 
 let db;
 (async () => {
@@ -102,82 +104,45 @@ app.post('/loginEventOrg', async (req, res) => {
 });
 
 
-// EVENT CREATION + RETRIEVAL
-// app.post('/api/events', async (req, res) => {
-//   const { org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price } = req.body;
-//   try {
-//     await db.query(
-//       `INSERT INTO newEvents (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price)
-//        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-//       [org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price || 0]
-//     );
-//     res.status(201).send('Event created successfully');
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send('Error adding event');
-//   }
-// });
-const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname); // unique filename
-  }
-});
-
-const upload = multer({ storage });
-
-app.post("/api/events", upload.single("image"), async (req, res) => {
+//EVENT CREATION + RETRIEVAL
+app.post('/api/events', async (req, res) => {
+  const { org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price } = req.body;
   try {
-    console.log("BODY:", req.body);
-    console.log("FILE:", req.file);
-
-    const {
-      org_id,
-      title,
-      description,
-      event_date,
-      event_time,
-      location_name,
-      capacity,
-      ticket_policy,
-      price
-    } = req.body;
-
-    const image_url = req.file
-      ? `/uploads/${req.file.filename}`
-      : null;
-
     await db.query(
-      `INSERT INTO newEvents 
-      (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price, image_url)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-      [
-        org_id,
-        title,
-        description,
-        event_date,
-        event_time,
-        location_name,
-        capacity,
-        ticket_policy,
-        price || 0,
-        image_url
-      ]
+      `INSERT INTO newEvents (org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price || 0]
     );
-
-    res.status(201).send("Event created successfully");
+    res.status(201).send('Event created successfully');
   } catch (err) {
     console.error(err);
-    res.status(500).send(" Error adding event");
+    res.status(500).send('Error adding event');
   }
 });
+
 
 app.get('/api/events', async (req, res) => {
   try {
-    const [results] = await db.query('SELECT * FROM newEvents ORDER BY created_at DESC');
+const [results] = await db.query(`
+  SELECT 
+    event_id,
+    org_id,
+    title,
+    description,
+    COALESCE(image, "") AS image,
+    DATE(event_date) AS event_date,
+    event_time,
+    location_name,
+    capacity,
+    ticket_policy,
+    CAST(price AS DECIMAL(10,2)) AS price,
+    COALESCE(tickets_sold, 0) AS tickets_sold,
+    COALESCE(attendance_count, 0) AS attendance_count,
+    created_at,
+    status
+  FROM newevents
+  ORDER BY created_at DESC
+`);
     res.json(results);
   } catch (err) {
     console.error(err);

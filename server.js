@@ -250,42 +250,27 @@ app.put('/api/approve-organizer/:id', async (req, res) => {
   }
 });
 
-// app.get('/api/events/moderate', async (req, res) => {
-//   try {
-//     const [rows] = await db.query("SELECT * FROM newevents WHERE status = 'pending'");
-//     res.json(rows);
-//   } catch (err) {
-//     console.error(' Error', err);
-//     res.status(500).send(err.message);
-//   }
-// });
 
-app.get('/api/events/moderate', (req, res) => {
-  const sql = `
-    SELECT 
-      e.event_id,
-      e.title,
-      e.status,
-      e.org_id,
-      o.first_name,
-      o.last_name,
-      CONCAT(o.first_name, ' ', o.last_name) AS organizer_name
-    FROM newevents e
-    JOIN event_organizers o 
+app.get('/api/events/moderate', async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        e.event_id,
+        e.title,
+        e.status,
+        COALESCE(CONCAT(o.first_name, ' ', o.last_name), 'Unknown') AS organizer_name
+      FROM newevents e
+      LEFT JOIN event_organizers o
       ON e.org_id = o.org_id
-    WHERE e.status = 'pending';
-  `;
-
-  db.query(sql, (err, rows) => {
-    if (err) {
-      console.error(" Error", err);
-      return res.status(500).send("Database error");
-    }
+      WHERE e.status = 'pending';
+    `);
 
     res.json(rows);
-  });
+  } catch (err) {
+    console.error(" /api/events/moderate:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
-
 
 app.put('/api/events/approve/:id', async (req, res) => {
   try {

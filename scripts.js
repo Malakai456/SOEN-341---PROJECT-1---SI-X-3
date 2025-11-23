@@ -196,6 +196,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
   }
 
   const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title}"?`);
+  console.log("${title}")
   if (!confirmPurchase) return;
 
   try {
@@ -207,7 +208,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       body: JSON.stringify({ user_id: user.user_id, event_id })
     });
 
-    console.log(' Fetch completed:', res.status);
+  
 
     if (!res.ok) {
       const msg = await res.text();
@@ -243,11 +244,22 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
 
 
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-event-id]');
+  const btn = e.target.closest('.buy-button');
   if (!btn) return;
-  const id = Number(btn.getAttribute('data-event-id'));
-  if (id) buyEvent(id);
+
+  const id       = Number(btn.dataset.eventId);
+  const title    = btn.dataset.title;
+  const details  = btn.dataset.details;
+  const location = btn.dataset.location;
+  const date     = btn.dataset.date;
+  const time     = btn.dataset.time;
+  const price    = Number(btn.dataset.price);
+
+  if (id) {
+    buyEvent(id, title, details, location, date, time, price);
+  }
 });
+
 
 
 // LOGIN FOR ADMIN

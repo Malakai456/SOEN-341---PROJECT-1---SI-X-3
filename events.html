@@ -73,11 +73,20 @@ function displayEvents(eventList) {
       <p><strong>Location:</strong> ${e.location_name}</p>
       <p>${e.description ?? ""}</p>
 
-      <div class="event-footer">
-        <span class="price">$${cleanPrice}</span>
-        <button class="buy-button"
-          onclick="buyEvent(${e.event_id})">Buy</button>
-      </div>
+
+  <div class="event-footer">
+    <span class="price">$${cleanPrice}</span>
+    <button class="buy-button"
+      data-event-id="${e.event_id}"
+      data-title="${e.title.replace(/"/g, '&quot;')}"
+      data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
+      data-location="${e.location_name.replace(/"/g, '&quot;')}"
+      data-date="${cleanDate}"
+      data-time="${e.event_time}"
+      data-price="${cleanPrice}">
+      Buy
+    </button>
+  </div>
     `;
 
     eventGrid.appendChild(card);

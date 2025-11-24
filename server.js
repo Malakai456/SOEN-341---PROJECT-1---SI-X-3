@@ -138,66 +138,6 @@ app.get('/api/me/purchases', (req, res) => {
 
 });
 
-app.post('/api/me/purchases', (req, res) => {
-  const {user_id, event_id, title, price_paid} = req.body;
-
-  //Basic validation
-  if(!user_id){
-    return res.status(400).json({error: 'User ID is required to make a purchase'});
-  }
-
-
-  //Convert price to float
-  let price = 0.00;
-  if(price_paid){
-    price = parseFloat(price_paid.toString().replace(/[^0-9.-]+/g,""));
-  }
-
-  //Define the insert query
-
-  const insertPurchaseQuery = (uID, eID, p) =>{
-  
-    const sql = `
-      INSERT INTO purchases(user_id, event_id, price_paid, purchase_date)
-      VALUES (?, ?, ?, NOW())
-    `;
-
-    db.query(sql, [uID, eID, p], (err, result) => {
-      if(err){
-        console.error('Error recording purchase:', err);
-        return res.status(500).json({error: 'Purchase failed. Database error.'});
-      }
-
-      res.status(201).json({
-        message: 'Purchase recorded successfully',
-        ticket_id: result.insertId,
-        ticketURL: `http://localhost:5000/tickets/${result.insertId}`,
-        title: title,
-        price: p
-      })
-  }
-
-    );
-  };
-  //Handle missing event_id
-
-  if (event_id){
-    insertPurchaseQuery(user_id, event_id, price);
-  }else if (title){
-    //If event_id is missing, try to find it by title
-    const findEventQuery = 'SELECT event_id FROM events WHERE title = ? LIMIT 1';
-    db.query(findEventQuery, [title], (err, results) => {
-      if(err || results.length ===0){
-        console.error('Event lookup failed:', err);
-        return res.status(400).json({error: 'Event not found for purchase'});
-      }
-      const foundeventid = results[0].event_id;
-      insertPurchaseQuery(user_id, foundeventid, price);
-    });
-  }else{
-    res.status(400).json({error: 'Either event_id or title must be provided for purchase'});
-  }
-});
 
 
 // EVENT CREATION + RETRIEVAL

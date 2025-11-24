@@ -50,10 +50,9 @@ function displayEvents(eventList) {
   eventGrid.innerHTML = "";
 
   eventList.forEach(e => {
-
     const cleanDate  = e.event_date?.split("T")[0] ?? e.event_date;
     const cleanPrice = Number(e.price).toFixed(2);
-    const clubClass  = e.location_name.replace(/\s+/g,"");
+    const clubClass  = e.location_name.replace(/\s+/g, "");
 
     const imgSrc = (e.image && e.image !== "NULL")
       ? e.image
@@ -73,20 +72,19 @@ function displayEvents(eventList) {
       <p><strong>Location:</strong> ${e.location_name}</p>
       <p>${e.description ?? ""}</p>
 
-
-  <div class="event-footer">
-    <span class="price">$${cleanPrice}</span>
-    <button class="buy-button"
-      data-event-id="${e.event_id}"
-      data-title="${e.title.replace(/"/g, '&quot;')}"
-      data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
-      data-location="${e.location_name.replace(/"/g, '&quot;')}"
-      data-date="${cleanDate}"
-      data-time="${e.event_time}"
-      data-price="${cleanPrice}">
-      Buy
-    </button>
-  </div>
+      <div class="event-footer">
+        <span class="price">$${cleanPrice}</span>
+        <button class="buy-button"
+          data-event-id="${e.event_id}"
+          data-title="${e.title.replace(/"/g, '&quot;')}"
+          data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
+          data-location="${e.location_name.replace(/"/g, '&quot;')}"
+          data-date="${cleanDate}"
+          data-time="${e.event_time}"
+          data-price="${cleanPrice}">
+          Buy
+        </button>
+      </div>
     `;
 
     eventGrid.appendChild(card);
@@ -94,6 +92,7 @@ function displayEvents(eventList) {
 
   mixer.forceRefresh();
 }
+
 
 fetch("http://localhost:5000/api/events")
   .then(res => res.json())
@@ -103,10 +102,12 @@ fetch("http://localhost:5000/api/events")
     updateFilterOptions();
   });
 
+
 const mixer = mixitup("#eventGrid", {
   selectors: { target: ".mix" },
   animation: { duration: 250 }
 });
+
 
 function updateFilterOptions() {
   filterValue.innerHTML = "";
@@ -134,8 +135,8 @@ function updateFilterOptions() {
 
     option.value =
       type === "club"
-        ? "." + o.replace(/\s+/g, "")          
-        : `[data-${type}='${o}']`;            
+        ? "." + o.replace(/\s+/g, "") 
+        : `[data-${type}='${o}']`;
 
     option.textContent = o;
     filterValue.appendChild(option);
@@ -144,12 +145,47 @@ function updateFilterOptions() {
   mixer.filter("all");
 }
 
-
 filterType.addEventListener("change", updateFilterOptions);
+
 filterValue.addEventListener("change", () =>
   mixer.filter(filterValue.value === "all" ? "all" : filterValue.value)
 );
+
+
+document.addEventListener("click", e => {
+    const btn = e.target.closest(".buy-button");
+    if (!btn) return;
+
+    const title    = btn.dataset.title;
+    const details  = btn.dataset.details;
+    const location = btn.dataset.location;
+    const date     = btn.dataset.date;
+    const time     = btn.dataset.time;
+    const price    = btn.dataset.price;
+
+    saveEventToCalendar({ title, details, location, date, time, price });
+});
+
+
+function saveEventToCalendar(ev) {
+    let userCalendar = JSON.parse(localStorage.getItem("userCalendar")) || [];
+
+    userCalendar.push({
+        title: ev.title,
+        details: ev.details,
+        location: ev.location,
+        date: ev.date,
+        time: ev.time,
+        price: ev.price
+    });
+
+    localStorage.setItem("userCalendar", JSON.stringify(userCalendar));
+
+    console.log("Saved to calendar:", userCalendar);
+}
+
 </script>
+
 
 </body>
 </html>

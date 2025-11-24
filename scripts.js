@@ -196,7 +196,6 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
   }
 
   const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title}"?`);
-  console.log("${title}")
   if (!confirmPurchase) return;
 
   try {
@@ -214,7 +213,16 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       const msg = await res.text();
       return;
     }
-
+    let userCalendar = JSON.parse(localStorage.getItem('userCalendar')) || [];
+    userCalendar.push({
+        title: title,
+        date: date,
+        time: time,
+        details: details,
+        location: location,
+        price: price
+    });
+    localStorage.setItem('userCalendar', JSON.stringify(userCalendar));
     const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
   
 

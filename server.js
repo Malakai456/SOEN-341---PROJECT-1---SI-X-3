@@ -336,4 +336,35 @@ app.get("/api/admin/stats", async (req, res) => {
   }
 });
 
+
+// app.get('/api/user-events/:user_id', async (req, res) => {
+//     const userId = req.params.user_id;
+
+//     try {
+//         const [rows] = await db.execute(`
+//             SELECT 
+//                 e.event_id,
+//                 e.title,
+//                 e.description,
+//                 e.image,
+//                 e.event_date AS date,
+//                 e.event_time AS time,
+//                 e.location_name AS location,
+//                 e.price
+//             FROM bought_events b
+//             JOIN events e ON b.event_id = e.event_id
+//             WHERE b.user_id = ?
+//         `, [userId]);
+
+//         res.json(rows);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Server Error");
+//     }
+// });
+
+
+
+
+
 app.listen(PORT, () => console.log(` Server running on port ${PORT}`));

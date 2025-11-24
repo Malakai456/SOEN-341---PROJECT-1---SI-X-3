@@ -516,3 +516,18 @@ section {
   border-color: #007bff;
   box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
 }
+.download-btn {
+  background: #1c5edd;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.download-btn:hover {
+  background: #154bb5;
+}

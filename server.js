@@ -1,8 +1,8 @@
 const mysql = require('mysql2/promise');
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
+
 const PORT = 5000;
 
 app.use(cors());
@@ -66,6 +66,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 // EVENT ORGANIZER REGISTER / LOGIN
 
 app.post('/registerEventOrg', async (req, res) => {
@@ -103,6 +104,19 @@ app.post('/loginEventOrg', async (req, res) => {
     res.status(500).send('Error logging in.');
   }
 });
+
+// Purchase logic -- Add pruchases table & relations routing
+
+app.get('/api/me/purchases', (req, res) => {
+  const userId = req.query.userId;
+
+  if(!userId){
+    return  res.status(400).send('Missing userId parameter');
+  }
+
+  
+}
+  );
 
 
 // EVENT CREATION + RETRIEVAL

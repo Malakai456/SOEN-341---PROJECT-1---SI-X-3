@@ -114,7 +114,20 @@ app.get('/api/me/purchases', (req, res) => {
     return  res.status(400).send('Missing userId parameter');
   }
 
-  
+  const query = `
+        SELECT 
+            p.purchase_id,
+            e.title AS title,
+            e.starts_at AS starts_at,
+            p.price_paid AS price,
+            p.purchase_date AS purchaseDate
+        FROM purchases p
+        JOIN events e ON p.event_id = e.event_id
+        WHERE p.user_id = ?
+        ORDER BY p.purchase_date DESC
+    `;
+
+
 }
   );
 

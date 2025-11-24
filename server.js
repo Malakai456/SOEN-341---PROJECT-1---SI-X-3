@@ -126,10 +126,17 @@ app.get('/api/me/purchases', (req, res) => {
         WHERE p.user_id = ?
         ORDER BY p.purchase_date DESC
     `;
+  db.query(query, [userId], (err, results) => {
+    if (err){
+      console.error('Error fetching purchases:', err);
+      return res.status(500).send({error: 'Database error fetchhing purchases'});
+    }
+
+    res.json(results);
+  });
 
 
-}
-  );
+});
 
 
 // EVENT CREATION + RETRIEVAL

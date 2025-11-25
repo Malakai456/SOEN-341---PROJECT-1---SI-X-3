@@ -133,7 +133,7 @@ document.getElementById('exportBtn').addEventListener('click', exportCSV);
 let eventsData = []; 
 let chart;
 
-fetch('http://localhost:5000/api/event-analytics')
+fetch('http://localhost:5001/api/event-analytics')
   .then(res => res.json())
   .then(events => {
     const select = document.getElementById('eventSelect');
@@ -214,7 +214,7 @@ function exportCSV() {
     return;
   }
 
-  const downloadUrl = `http://localhost:5000/export-csv/${eventId}`;
+  const downloadUrl = `http://localhost:5001/export-csv/${eventId}`;
   const a = document.createElement("a");
   a.href = downloadUrl;
   a.download = `attendees_event_${eventId}.csv`;

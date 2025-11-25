@@ -12,7 +12,7 @@ async function registerUser() {
 
 try{
         
-        const response = await fetch('http://localhost:5000/register', {
+        const response = await fetch('http://localhost:5001/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newClient),
@@ -38,7 +38,7 @@ async function loginUser() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://localhost:5000/login', {
+        const response = await fetch('http://localhost:5001/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -103,7 +103,7 @@ async function registerEventOrganizer() {
 console.log(newEventOrg)
 try{
         
-        const response = await fetch('http://localhost:5000/registerEventOrg', {
+        const response = await fetch('http://localhost:5001/registerEventOrg', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEventOrg),
@@ -225,12 +225,12 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
     return;
   }
 
-  const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title}"?`);
+  const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title || 'this event'}"?`);
   if (!confirmPurchase) return;
 
   try {
    
-    const res = await fetch('http://localhost:5000/buy', {
+    const res = await fetch('http://localhost:5001/buy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.user_id, event_id })
@@ -240,6 +240,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
 
     if (!res.ok) {
       const msg = await res.text();
+      alert(msg || 'Could not complete purchase.');
       return;
     }
 
@@ -275,7 +276,16 @@ document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-event-id]');
   if (!btn) return;
   const id = Number(btn.getAttribute('data-event-id'));
-  if (id) buyEvent(id);
+  if (!id) return;
+  buyEvent(
+    id,
+    btn.getAttribute('data-title') || '',
+    btn.getAttribute('data-desc') || '',
+    btn.getAttribute('data-location') || '',
+    btn.getAttribute('data-date') || '',
+    btn.getAttribute('data-time') || '',
+    btn.getAttribute('data-price') || ''
+  );
 });
 
 

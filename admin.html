@@ -58,7 +58,7 @@
 </main>
 
 <script>
-fetch('http://localhost:5000/api/pending-organizers')
+fetch('http://localhost:5001/api/pending-organizers')
   .then(res => res.json())
   .then(organizers => {
     
@@ -76,7 +76,7 @@ fetch('http://localhost:5000/api/pending-organizers')
   });
 
 function approveOrganizer(orgId) {
-  fetch(`http://localhost:5000/api/approve-organizer/${orgId}`, { method: 'PUT' })
+  fetch(`http://localhost:5001/api/approve-organizer/${orgId}`, { method: 'PUT' })
     .then(res => res.text())
     .then(msg => {
       alert(msg);
@@ -85,7 +85,7 @@ function approveOrganizer(orgId) {
     .catch(err => console.error(err));
 }
 
-fetch('http://localhost:5000/api/events/moderate')
+fetch('http://localhost:5001/api/events/moderate')
   .then(res => res.json())
   .then(events => {
     const tbody = document.querySelector('#eventTable tbody');
@@ -104,18 +104,18 @@ fetch('http://localhost:5000/api/events/moderate')
   });
 
 function approveEvent(eventId) {
-  fetch(`http://localhost:5000/api/events/approve/${eventId}`, { method: 'PUT' })
+  fetch(`http://localhost:5001/api/events/approve/${eventId}`, { method: 'PUT' })
     .then(res => res.text())
     .then(msg => { alert(msg); location.reload(); });
 }
 function deleteEvent(eventId) {
   if (confirm("Delete this event?"))
-    fetch(`http://localhost:5000/api/events/delete/${eventId}`, { method: 'DELETE' })
+    fetch(`http://localhost:5001/api/events/delete/${eventId}`, { method: 'DELETE' })
       .then(res => res.text())
       .then(msg => { alert(msg); location.reload(); });
 }
 // Load global platform statistics
-fetch('http://localhost:5000/api/admin/stats')
+fetch('http://localhost:5001/api/admin/stats')
   .then(res => res.json())
   .then(stats => {
     document.getElementById('totalEvents').textContent     = stats.total_events || 0;

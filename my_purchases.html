@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Purchases - CampusEvents</title>
+  <link rel="stylesheet" href="public/styles.css">
+  <link rel="stylesheet" href="public/purchases.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="purchases-body">
+  <header>
+    <h2 class="companyname">
+      <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+    </h2>
+    <nav class="navigation">
+      <a href="mainpage.html">Home</a>
+      <a href="contact.html">Contact</a>
+      <a href="calendar.html">My Calendar</a>
+      <a href="my_purchases.html" class="active">My Purchases</a>
+      <a href="register.html" class="signInButton">Sign Up</a>
+      <a href="login.html" class="loginbutton">Log In</a>
+    </nav>
+  </header>
+
+  <main class="purchases-shell">
+    <section class="purchases-card">
+      <div class="purchases-heading">
+        <div>
+          <p class="eyebrow">Profile</p>
+          <h1>My Purchases</h1>
+          <p class="subhead">Your tickets and receipts live here. Open a ticket to preview its QR code.</p>
+        </div>
+        <button id="refreshPurchases" class="ghost-btn">Refresh</button>
+      </div>
+
+      <div id="purchasesStatus" class="status-banner"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Price</th>
+              <th>Purchased</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="purchasesBody">
+            <tr class="placeholder-row">
+              <td colspan="7">Loading your purchases…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div id="ticketModal" class="ticket-modal hidden">
+    <div class="ticket-modal__backdrop"></div>
+    <div class="ticket-modal__dialog">
+      <button id="closeTicketModal" class="close-btn" aria-label="Close ticket modal">×</button>
+      <p class="eyebrow">Ticket Preview</p>
+      <h3 id="modalEventTitle"></h3>
+      <p id="modalEventMeta" class="modal-meta"></p>
+
+      <div class="qr-box">
+        <div id="qrCodeBox"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="openTicketPage" class="primary-btn">Open Ticket Page</button>
+        <button id="closeTicketFooter" class="ghost-btn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('purchasesStatus');
+    const tbody = document.getElementById('purchasesBody');
+    const refreshBtn = document.getElementById('refreshPurchases');
+    const ticketModal = document.getElementById('ticketModal');
+    const qrCodeBox = document.getElementById('qrCodeBox');
+    const modalEventTitle = document.getElementById('modalEventTitle');
+    const modalEventMeta = document.getElementById('modalEventMeta');
+    const openTicketPageBtn = document.getElementById('openTicketPage');
+
+    const user = (() => {
+      try { return JSON.parse(localStorage.getItem('currentUser')); }
+      catch { return null; }
+    })();
+
+    let purchaseCache = [];
+    let qrInstance = null;
+
+    function setStatus(message, tone = 'info') {
+      statusEl.textContent = message || '';
+      statusEl.dataset.tone = tone;
+      statusEl.style.display = message ? 'block' : 'none';
+    }
+
+    function formatDate(value) {
+      if (!value) return '';
+      const d = new Date(value);
+      return isNaN(d) ? value : d.toLocaleDateString();
+    }
+
+    function formatTime(value) {
+      if (!value) return '';
+      const d = new Date('1970-01-01T' + value);
+      return isNaN(d) ? value : d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDateTime(value) {
+      if (!value) return '';
+      const d = new Date(value);
+      return isNaN(d) ? value : d.toLocaleString();
+    }
+
+    function renderEmpty(message) {
+      tbody.innerHTML = '';
+      const tr = document.createElement('tr');
+      tr.className = 'placeholder-row';
+      tr.innerHTML = `<td colspan="7">${message}</td>`;
+      tbody.appendChild(tr);
+    }
+
+    function renderPurchases(list) {
+      tbody.innerHTML = '';
+
+      if (!list.length) {
+        renderEmpty('You have not purchased any tickets yet.');
+        return;
+      }
+
+      list.forEach((p, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div class="event-title">${p.title ?? ''}</div>
+            <div class="event-sub">${p.description ?? ''}</div>
+          </td>
+          <td>${formatDate(p.event_date)}</td>
+          <td>${formatTime(p.event_time)}</td>
+          <td>${p.location_name ?? ''}</td>
+          <td>$${Number(p.price || 0).toFixed(2)}</td>
+          <td>${formatDateTime(p.purchase_time)}</td>
+          <td class="actions">
+            <button class="primary-btn small" data-ticket-index="${idx}">View Ticket</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function buildTicketData(purchase) {
+      const fullName = `${purchase.first_name ?? ''} ${purchase.last_name ?? ''}`.trim();
+      const ticketUrl = `${window.location.origin}/ticket.html?ticketId=${encodeURIComponent(purchase.ticket_code)}`;
+      return {
+        ticketId: purchase.ticket_code,
+        ticketUrl,
+        firstName: purchase.first_name ?? user?.first_name ?? '',
+        lastName: purchase.last_name ?? user?.last_name ?? '',
+        eventName: purchase.title ?? '',
+        eventDetails: purchase.description ?? '',
+        eventLocation: purchase.location_name ?? '',
+        eventDate: purchase.event_date ?? '',
+        eventTime: purchase.event_time ?? '',
+        eventPrice: purchase.price ?? '',
+        eventImage: purchase.image && purchase.image !== 'NULL' ? purchase.image : 'placeholder.png',
+        fullName
+      };
+    }
+
+    function openTicketModal(purchase) {
+      const ticketData = buildTicketData(purchase);
+      modalEventTitle.textContent = ticketData.eventName || 'Ticket';
+      modalEventMeta.textContent = `${formatDate(ticketData.eventDate)} · ${formatTime(ticketData.eventTime)} · ${ticketData.eventLocation}`;
+
+      if (qrInstance) {
+        qrCodeBox.innerHTML = '';
+      }
+      qrInstance = new QRCode(qrCodeBox, {
+        text: ticketData.ticketUrl,
+        width: 160,
+        height: 160
+      });
+
+      openTicketPageBtn.onclick = () => {
+        sessionStorage.setItem('lastTicket', JSON.stringify({
+          ticketId: ticketData.ticketId,
+          ticketUrl: ticketData.ticketUrl,
+          firstName: ticketData.firstName,
+          lastName: ticketData.lastName,
+          eventName: ticketData.eventName,
+          eventDetails: ticketData.eventDetails,
+          eventLocation: ticketData.eventLocation,
+          eventDate: ticketData.eventDate,
+          eventTime: ticketData.eventTime,
+          eventPrice: ticketData.eventPrice,
+          eventImage: ticketData.eventImage
+        }));
+        window.location.href = ticketData.ticketUrl;
+      };
+
+      ticketModal.classList.remove('hidden');
+    }
+
+    function closeTicketModal() {
+      ticketModal.classList.add('hidden');
+      if (qrInstance) {
+        qrCodeBox.innerHTML = '';
+        qrInstance = null;
+      }
+    }
+
+    async function loadPurchases() {
+      if (!user?.user_id) {
+        setStatus('Log in to see your purchases.', 'warn');
+        renderEmpty('You need to log in to view purchased tickets.');
+        return;
+      }
+
+      setStatus('Loading purchases…', 'info');
+      renderEmpty('Loading your purchases…');
+
+      try {
+        const res = await fetch(`http://localhost:5001/api/users/${user.user_id}/purchases`);
+        if (!res.ok) {
+          const msg = await res.text();
+          throw new Error(msg || 'Unable to load purchases');
+        }
+
+        const data = await res.json();
+        purchaseCache = Array.isArray(data) ? data : [];
+        renderPurchases(purchaseCache);
+        setStatus(`Showing ${purchaseCache.length} purchase${purchaseCache.length === 1 ? '' : 's'}.`, 'success');
+      } catch (err) {
+        console.error(err);
+        setStatus(err.message || 'Could not load purchases.', 'error');
+        renderEmpty('No data to display.');
+      }
+    }
+
+    tbody.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-ticket-index]');
+      if (!btn) return;
+      const idx = Number(btn.getAttribute('data-ticket-index'));
+      if (!Number.isInteger(idx) || !purchaseCache[idx]) return;
+      openTicketModal(purchaseCache[idx]);
+    });
+
+    document.getElementById('closeTicketModal').addEventListener('click', closeTicketModal);
+    document.getElementById('closeTicketFooter').addEventListener('click', closeTicketModal);
+    ticketModal.addEventListener('click', (e) => {
+      if (e.target === ticketModal.querySelector('.ticket-modal__backdrop')) closeTicketModal();
+    });
+
+    refreshBtn.addEventListener('click', loadPurchases);
+
+    loadPurchases();
+  </script>
+</body>
+</html>

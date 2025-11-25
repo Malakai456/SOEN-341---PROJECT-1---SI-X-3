@@ -17,12 +17,13 @@
    <nav class = "navigation">
         <a href="mainpage.html"> Home</a>
         <a href="contact.html"> Contact</a>
+        <a href="my_purchases.html">My Purchases</a>
         <a href="register.html" class="signInButton">Sign In</a>
         <a href="login.html" class="loginbutton">Log In</a>
    </nav>
 </header>    
 <div class="homepage">
- <form id="loginForm" action="http://localhost:5000/login" method="POST" novalidate>
+ <form id="loginForm" novalidate>
   <h1>Login</h1>
 
   <div class="input-text">
@@ -48,62 +49,45 @@
 </form>
 </div>
 
+<div class="business">
+  <p>Event Organizer? <a href ="loginOrganizer.html">LogIn</a> <a href= "registerOrganizer.html" > Sign Up</a></p>
+</div>
 
-<script src="scripts.js"></script>
+<div class="admin">
+  <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
+</div>
 
-    <div class="business">
-        <p>Event Organizer? <a href ="loginOrganizer.html">LogIn</a> <a href= "registerOrganizer.html" > Sign Up</a></p>
-    </div>
-
-  <div class="admin">
-        <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
-
-
-  <div class="admin">
-        <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
-    </div>
-
-  // Only use fetch when running from http(s). If opened via file://, let the form submit normally.
-  const isHttp = location.protocol === 'http:' || location.protocol === 'https:';
-
-  function setLoading(on) {
-    if (!btn) return;
-    btn.disabled = on;
-    btn.textContent = on ? 'Logging in…' : 'Login';
-  }
-
-  async function doFetchLogin(username, password) {
-    const res = await fetch('/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json(); // { message, user: { user_id, username } }
-  }
-
-  form.addEventListener('submit', async (e) => {
-    if (!isHttp) return; // allow classic POST when opened from file://
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById("loginForm");
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const username = document.getElementById('username')?.value.trim();
-    const password = document.getElementById('password')?.value.trim();
-    if (!username || !password) { alert('Please enter username and password.'); return; }
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-    setLoading(true);
     try {
-      const data = await doFetchLogin(username, password);
-      localStorage.setItem('loggedUser', JSON.stringify(data.user));
-      window.location.href = 'events.html';
+      const res = await fetch("http://localhost:5001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) {
+        alert("Invalid username or password");
+        return;
+      }
+
+      const user = await res.json();
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      window.location.href = "events.html";
     } catch (err) {
-      alert(  (err.message || 'Login failed'));
-    } finally {
-      setLoading(false);
+      console.error(err);
+      alert("Invalid username or password");
     }
   });
-})();
+});
 </script>
-
 
 </body>
 </html>

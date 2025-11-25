@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Event Analytics Dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="public/styles.css">
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -73,8 +73,16 @@
 
     canvas {
       width: 100%;
+      height: 100%;
       margin-top: 40px;
     }
+    #eventChart {
+  max-width: 350px !important;
+  max-height: 350px !important;
+  margin: 25px auto !important;
+  display: block;
+}
+
   </style>
 </head>
 <body>
@@ -196,37 +204,33 @@ function updateChart(issued, remaining, attendance) {
   });
 }
 
+// EXPORT CSV 
 function exportCSV() {
   const select = document.getElementById('eventSelect');
   const eventId = select.value;
-  const selected = eventsData.find(e => e.event_id == eventId);
 
- 
+  if (!eventId) {
+    alert("⚠️ Please select an event first!");
+    return;
+  }
 
-  const headers = ["Event Title", "Tickets Issued", "Remaining Capacity", "Attendance Rate"];
-  const sold = selected.tickets_sold;
-  const remain = selected.remaining_capacity;
-  const capacity = selected.capacity;
-  const attendanceRate = capacity > 0 ? ((sold / capacity) * 100).toFixed(1) + '%' : '0%';
-
-  const values = [selected.title, sold, remain, attendanceRate];
-
-  const csvContent = [headers.join(","), values.join(",")].join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-
+  const downloadUrl = `http://localhost:5000/export-csv/${eventId}`;
   const a = document.createElement("a");
-  a.href = url;
-  a.download = `${selected.title.replace(/\s+/g, '_')}_analytics.csv`;
+  a.href = downloadUrl;
+  a.download = `attendees_event_${eventId}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  alert(` CSV exported for "${selected.title}"`);
 }
+
 </script>
-
-
+<footer class="site-footer">
+    <p>
+      © 2025 Your Company · 
+      <a href="/about">About</a> · 
+      <a href="/contact">Contact</a> · 
+      <a href="/privacy">Privacy</a>
+    </p>
+  </footer>
 </body>
 </html>

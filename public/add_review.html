@@ -1,0 +1,193 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Review</title>
+
+    <link rel="stylesheet" href="styles.css">
+
+    <style>
+        .review-container {
+            width: 60%;
+            margin: 60px auto;
+            background: rgba(255, 255, 255, 0.88);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #2e6591;
+        }
+
+     
+        .star-rating {
+            display: flex;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            margin: 15px 0;
+        }
+
+        .star {
+            color: #ccc;     
+            transition: 0.2s;
+            padding: 5px;
+        }
+
+        .star.selected {
+            color: gold;      
+        }
+
+        textarea {
+            width: 100%;
+            height: 130px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 12px;
+            resize: none;
+            margin-top: 10px;
+        }
+
+        .submit-review-btn {
+            margin-top: 25px;
+            padding: 12px 25px;
+            width: 100%;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            color: #ffffff;
+            border-radius: 8px;
+            background: #1e56ca;
+            transition: 0.2s;
+        }
+
+        .submit-review-btn:hover {
+            background: #6a42d8;
+        }
+
+        .success-msg, .error-msg {
+            display: none;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .success-msg {
+            background: #d4f8d4;
+            color: #2e7d32;
+        }
+
+        .error-msg {
+            background: #ffd4d4;
+            color: #b71c1c;
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h2 class="logo"></h2>
+
+    <h2 class="companyname">CampusEvents</h2>
+
+    <nav class="navigation">
+        <a href="mainpage.html">Home</a>
+        <a href="contact.html">Contact</a>
+        <a href="register.html" class="signInButton">Sign In</a>
+        <a href="login.html" class="loginbutton">Log In</a>
+    </nav>
+</header>
+
+<div class="review-container">
+    <h2>Leave a Review</h2>
+
+    <form id="reviewForm">
+        <input type="hidden" id="event_id">
+
+        
+        <div class="star-rating" id="starRating">
+            <span class="star" data-value="1">&#9733;</span>
+            <span class="star" data-value="2">&#9733;</span>
+            <span class="star" data-value="3">&#9733;</span>
+            <span class="star" data-value="4">&#9733;</span>
+            <span class="star" data-value="5">&#9733;</span>
+        </div>
+
+        <textarea id="review_text" placeholder="Write your review..."></textarea>
+
+        <button class="submit-review-btn" type="submit">Submit Review</button>
+
+        <div class="success-msg" id="successMessage">Review submitted!</div>
+        <div class="error-msg" id="errorMessage">Something went wrong.</div>
+    </form>
+</div>
+
+<script>
+    
+    let selectedRating = 0;
+
+    const stars = document.querySelectorAll(".star");
+
+    stars.forEach(star => {
+        star.addEventListener("click", () => {
+            selectedRating = parseInt(star.dataset.value);
+
+            // highlight all stars ≤ clicked star
+            stars.forEach(s => {
+                if (parseInt(s.dataset.value) <= selectedRating) {
+                    s.classList.add("selected");
+                } else {
+                    s.classList.remove("selected");
+                }
+            });
+        });
+    });
+
+    
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("event_id").value = params.get("event_id");
+
+  
+    document.getElementById("reviewForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (selectedRating === 0) {
+            alert("Please select a rating.");
+            return;
+        }
+
+        const payload = {
+            event_id: document.getElementById("event_id").value,
+            rating: selectedRating,
+            review_text: document.getElementById("review_text").value
+        };
+
+        try {
+            const res = await fetch("/api/reviews", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById("successMessage").style.display = "block";
+                setTimeout(() => window.location.href = "my_purchases.html", 1500);
+            } else {
+                document.getElementById("errorMessage").style.display = "block";
+            }
+
+        } catch (err) {
+            document.getElementById("errorMessage").style.display = "block";
+        }
+    });
+</script>
+
+</body>
+</html>

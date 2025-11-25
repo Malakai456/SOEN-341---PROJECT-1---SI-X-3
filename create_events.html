@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Create Event</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="public/styles.css">
   <style>
     body {
       background: linear-gradient(120deg, #eaf1ff, #f7fbff);
@@ -146,8 +146,13 @@
       <label>Ticket Price ($)</label>
       <input type="number" name="price" min="1" placeholder="Enter price if paid">
     </div>
+ <!-- <div class="input-text">
+      <label>Event Image</label>
+      <input type="file" name="image" id="eventImageUpload" accept="image/*">
+    </div> -->
 
-    <button type="submit">Create Event</button>
+    <!-- <img id="imagePreview" style="display:none; width:180px; border-radius:10px; margin-top:10px;">
+    <button type="submit">Create Event</button> -->
   </form>
 
   <div id="previewBox">
@@ -166,5 +171,13 @@
 </div>
 
 <script src="create_events.js"></script>
+<footer class="site-footer">
+    <p>
+      © CampusEvents2025 · 
+      <a href="about.html">About</a> · 
+      <a href="contactfoot.html">Contact</a> · 
+      <a href="privacy.html">Privacy</a>
+    </p>
+</footer>
 </body>
 </html>

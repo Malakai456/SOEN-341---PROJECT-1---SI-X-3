@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <title>Admin Login - CampusEvents</title>
+</head>
+<body>
+  <header>
+    <h2 class="companyname">
+      <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
+    </h2>
+    <nav class="navigation">
+      <a href="mainpage.html">Home</a>
+      <a href="contact.html">Contact</a>
+      <a href="login.html" class="loginbutton">User Login</a>
+    </nav>
+  </header>
+
+  <main class="homepage">
+    <form id="adminLoginForm">
+      <h1>Admin Login</h1>
+
+      <div class="input-text">
+        <input type="text" id="adminUsername" placeholder="Username" required>
+      </div>
+
+      <div class="input-text">
+        <input type="password" id="adminPassword" placeholder="Password" required>
+      </div>
+
+      <button type="button" onclick="loginAdmin()">Login</button>
+
+      <div class="register">
+        <p>Return to <a href="./login.html">User Login</a></p>
+      </div>
+    </form>
+  </main>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

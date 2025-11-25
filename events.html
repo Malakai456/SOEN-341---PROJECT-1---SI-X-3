@@ -1,145 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>All Events - CampusEvents</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-
-<header>
-    <h2 class="logo"></h2>
-    <h2 class="companyname">
-        <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
-    </h2>
-    <nav class="navigation">
-        <a href="mainpage.html">Home</a>
-        <a href="contact.html">Contact</a>
-        <a href="calendar.html">My Calendar</a>
-        <a href="register.html" class="signInButton">Sign In</a>
-        <a href="login.html" class="loginbutton">Log In</a>
-        <a href="admin.html">Admin</a>
-    </nav>
-</header>
-
-<!-- added: shows current logged user + logout -->
-<p style="margin-left:20px;">
-  Welcome, <span class="username-display"></span>!
-  <button class="logout-btn" onclick="logoutUser()" style="display:none;">Logout</button>
-</p>
-
-<main>
-<div class="filter-bar">
-    <label for="filterType">Filter by:</label>
-    <select id="filterType">
-        <option value="club">Club</option>
-        <option value="price">Price</option>
-        <option value="date">Date</option>
-    </select>
-
-    <label for="filterValue">Select:</label>
-    <select id="filterValue"></select>
-</div>
-
-<div id="messageBox"></div>
-<div class="event-grid" id="eventGrid"></div>
-
-<script src="scripts.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
-
-<script>
-const events = [
-    { id: 101, title:"Hackathon 2025", date:"2025-12-15", time:"08:00", location:"Engineering Club", price:10, image:"hackathon.png", details:"24-hour coding challenge!" },
-    { id: 102, title:"Karaoke Night", date:"2025-02-21", time:"18:00", location:"Business Club", price:5, image:"karaoke.png", details:"Sing your heart out" },
-    { id: 103, title:"Arts and Crafts", date:"2025-03-25", time:"17:00", location:"Arts Club", price:8, image:"artsandcrafts.png", details:"Explore arts and painting." },
-    { id: 104, title:"Chess Night", date:"2025-04-02", time:"19:00", location:"Finance Club", price:7, image:"chess.png", details:"Chess tournament 1V1" },
-    { id: 105, title:"Movie Night", date:"2025-01-10", time:"20:00", location:"Cinema Club", price:6, image:"movie.png", details:"Watch latest movies together." },
-    { id: 106, title:"Cooking Workshop", date:"2025-02-28", time:"16:00", location:"Culinary Club", price:12, image:"cooking.png", details:"Learn some delicious recipes." },
-    { id: 107, title:"Dance Battle", date:"2025-03-15", time:"18:00", location:"Dance Club", price:8, image:"dance.png", details:"Show your moves." },
-    { id: 108, title:"Gaming Tournament", date:"2025-05-05", time:"17:00", location:"Gaming Club", price:10, image:"gaming.png", details:"Compete in esports." },
-    { id: 109, title:"Book Club Meetup", date:"2025-06-12", time:"11:00", location:"Library", price:5, image:"book.png", details:"Discuss latest books." }
-];
-
-const eventGrid = document.getElementById('eventGrid');
-events.forEach(event => {
-    const card = document.createElement('div');
-    card.classList.add('event-card', 'mix', event.location.replace(/\s+/g,''));
-    card.setAttribute('data-price', event.price);
-    card.setAttribute('data-date', event.date);
-    card.setAttribute('data-club', event.location.replace(/\s+/g,''));
-    card.innerHTML = `
-      <img src="${event.image || 'placeholder.png'}" alt="${event.title}">
-      <h3>${event.title}</h3>
-      <p><strong>Date:</strong> ${event.event_date || event.date}</p>
-      <p><strong>Time:</strong> ${event.event_time || event.time}</p>
-      <p><strong>Location:</strong> ${event.location_name || event.location}</p>
-      <p>${event.description || event.details || ''}</p>
-      <div class="event-footer">
-        <span class="price">$${event.price}</span>
-<button class="buy-button"
-  onclick="buyEvent(${event.event_id}, '${event.title}', '${event.details}', '${event.location}', '${event.date}', '${event.time}', ${event.price})">
-  Buy
-</button>
-
-
-      </div>
-    `;
-    eventGrid.appendChild(card);
-  });
-
-
-displayEvents(events);
-
-fetch("http://localhost:5000/api/events")
-  .then(res => res.json())
-  .then(newEvents => {
-    displayEvents(newEvents);
-
-    if (newEvents.length > 0) {
-      document.getElementById('messageBox').innerHTML = 
-        `<p style="color:green;text-align:center;">${newEvents.length} new event(s) added by organizers!</p>`;
-    }
-  })
-  .catch(err => console.error("Error loading events:", err));
-
-const mixer = mixitup('#eventGrid', {
-    selectors: { target: '.mix' },
-    animation: { duration: 300 }
-});
-
-const filterType = document.getElementById('filterType');
-const filterValue = document.getElementById('filterValue');
-
-function updateFilterOptions() {
-    filterValue.innerHTML = '';
-    const type = filterType.value;
-    let uniqueOptions = [];
-    if(type === 'club') uniqueOptions = [...new Set(events.map(e => e.location))];
-    if(type === 'price') uniqueOptions = [...new Set(events.map(e => e.price))];
-    if(type === 'date') uniqueOptions = [...new Set(events.map(e => e.date))];
-
-    filterValue.innerHTML = `<option value="all">All</option>`;
-    uniqueOptions.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = type === 'club' ? '.' + opt.replace(/\s+/g,'') : `[data-${type}='${opt}']`;
-        option.textContent = opt;
-        filterValue.appendChild(option);
-    });
-    mixer.filter('all');
-}
-
-filterType.addEventListener('change', updateFilterOptions);
-filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
-updateFilterOptions();
-</script>
-
-<!-- added small call to show user info -->
-<script>showLoggedUser();</script>
-
-</main>
-</body>
-</html> -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -153,7 +11,7 @@ updateFilterOptions();
   <h2 class="companyname">
     <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
   </h2>
-  <nav class="navigation">
+    <nav class="navigation">
     <a href="mainpage.html">Home</a>
     <a href="contact.html">Contact</a>
     <a href="calendar.html">My Calendar</a>
@@ -183,90 +41,122 @@ updateFilterOptions();
 <script src="https://cdn.jsdelivr.net/npm/mixitup@3/dist/mixitup.min.js"></script>
 
 <script>
-const eventGrid = document.getElementById('eventGrid');
-let events = []; 
-
+let events = [];
+const eventGrid   = document.getElementById("eventGrid");
+const filterType  = document.getElementById("filterType");
+const filterValue = document.getElementById("filterValue");
 
 function displayEvents(eventList) {
-  eventGrid.innerHTML = ''; 
+  eventGrid.innerHTML = "";
 
-  eventList.forEach(event => {
-    const card = document.createElement('div');
-    card.classList.add('event-card', 'mix', event.location_name.replace(/\s+/g, ''));
-    card.setAttribute('data-price', event.price);
-    card.setAttribute('data-date', event.event_date);
-    card.setAttribute('data-club', event.location_name.replace(/\s+/g, ''));
+  eventList.forEach(e => {
 
+    const cleanDate  = e.event_date?.split("T")[0] ?? e.event_date;
+    const cleanPrice = Number(e.price).toFixed(2);
+    const clubClass  = e.location_name.replace(/\s+/g,"");
+
+    const imgSrc = (e.image && e.image !== "NULL")
+      ? e.image
+      : "https://via.placeholder.com/350x200?text=Event";
+
+    const card = document.createElement("div");
+    card.classList.add("event-card", "mix", clubClass);
+    card.setAttribute("data-price", cleanPrice);
+    card.setAttribute("data-date", cleanDate);
+    card.setAttribute("data-club", clubClass);
 
     card.innerHTML = `
-     <img src="${event.image}" alt="${event.title}">
-      <h3>${event.title}</h3>
-      <p><strong>Date:</strong> ${event.event_date}</p>
-      <p><strong>Time:</strong> ${event.event_time}</p>
-      <p><strong>Location:</strong> ${event.location_name}</p>
-      <p>${event.description || ''}</p>
-      <div class="event-footer">
-        <span class="price">$${event.price}</span>
-        <button class="buy-button"
-          onclick="buyEvent(${event.event_id}, '${event.title}', '${event.description}', '${event.location_name}', '${event.event_date}', '${event.event_time}', ${event.price})">
-          Buy
-        </button>
-      </div>
+      <img src="${imgSrc}" alt="${e.title}">
+      <h3>${e.title}</h3>
+      <p><strong>Date:</strong> ${cleanDate}</p>
+      <p><strong>Time:</strong> ${e.event_time}</p>
+      <p><strong>Location:</strong> ${e.location_name}</p>
+      <p>${e.description ?? ""}</p>
+
+
+  <div class="event-footer">
+    <span class="price">$${cleanPrice}</span>
+    <button class="buy-button"
+      data-event-id="${e.event_id}"
+      data-title="${e.title.replace(/"/g, '&quot;')}"
+      data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
+      data-location="${e.location_name.replace(/"/g, '&quot;')}"
+      data-date="${cleanDate}"
+      data-time="${e.event_time}"
+      data-price="${cleanPrice}">
+      Buy
+    </button>
+  </div>
     `;
+
     eventGrid.appendChild(card);
   });
+
+  mixer.forceRefresh();
 }
 
 fetch("http://localhost:5000/api/events")
   .then(res => res.json())
   .then(data => {
     events = data;
-    if (events.length > 0) {
-      displayEvents(events);
-      document.getElementById('messageBox').innerHTML = 
-        `<p style="color:green;text-align:center;">${events.length} event(s) available!</p>`;
-      updateFilterOptions();
-    } else {
-      document.getElementById('messageBox').innerHTML = 
-        `<p style="color:red;text-align:center;">No events found.</p>`;
-    }
-  })
-  .catch(err => {
-    console.error("Error loading events:", err);
-    document.getElementById('messageBox').textContent = "⚠️ Could not load events.";
+    displayEvents(events);
+    updateFilterOptions();
   });
 
-const mixer = mixitup('#eventGrid', {
-  selectors: { target: '.mix' },
-  animation: { duration: 300 }
+const mixer = mixitup("#eventGrid", {
+  selectors: { target: ".mix" },
+  animation: { duration: 250 }
 });
 
-const filterType = document.getElementById('filterType');
-const filterValue = document.getElementById('filterValue');
-
 function updateFilterOptions() {
-  filterValue.innerHTML = '';
+  filterValue.innerHTML = "";
   const type = filterType.value;
-  let uniqueOptions = [];
+  let opts = [];
 
-  if (type === 'club') uniqueOptions = [...new Set(events.map(e => e.location_name))];
-  if (type === 'price') uniqueOptions = [...new Set(events.map(e => e.price))];
-  if (type === 'date') uniqueOptions = [...new Set(events.map(e => e.event_date))];
+  if (type === "club") {
+    opts = [...new Set(events.map(e => e.location_name))];
+  }
+
+  if (type === "price") {
+    opts = [...new Set(events.map(e => Number(e.price).toFixed(2)))];
+  }
+
+  if (type === "date") {
+    opts = [...new Set(events.map(e =>
+      e.event_date.split("T")[0]
+    ))];
+  }
 
   filterValue.innerHTML = `<option value="all">All</option>`;
-  uniqueOptions.forEach(opt => {
-    const option = document.createElement('option');
-    option.value = type === 'club' ? '.' + opt.replace(/\s+/g, '') : `[data-${type}='${opt}']`;
-    option.textContent = opt;
+
+  opts.forEach(o => {
+    const option = document.createElement("option");
+
+    option.value =
+      type === "club"
+        ? "." + o.replace(/\s+/g, "")          
+        : `[data-${type}='${o}']`;            
+
+    option.textContent = o;
     filterValue.appendChild(option);
   });
 
-  mixer.filter('all');
+  mixer.filter("all");
 }
 
-filterType.addEventListener('change', updateFilterOptions);
-filterValue.addEventListener('change', () => mixer.filter(filterValue.value));
-</script>
 
+filterType.addEventListener("change", updateFilterOptions);
+filterValue.addEventListener("change", () =>
+  mixer.filter(filterValue.value === "all" ? "all" : filterValue.value)
+);
+</script>
+<footer class="site-footer">
+    <p>
+      © CampusEvents2025 · 
+      <a href="about.html">About</a> · 
+      <a href="contactfoot.html">Contact</a> · 
+      <a href="privacy.html">Privacy</a>
+    </p>
+</footer>
 </body>
 </html>

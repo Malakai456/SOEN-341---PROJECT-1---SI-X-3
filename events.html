@@ -11,7 +11,7 @@
   <h2 class="companyname">
     <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
   </h2>
-    <nav class="navigation">
+  <nav class="navigation">
     <a href="mainpage.html">Home</a>
     <a href="contact.html">Contact</a>
     <a href="calendar.html">My Calendar</a>
@@ -50,10 +50,9 @@ function displayEvents(eventList) {
   eventGrid.innerHTML = "";
 
   eventList.forEach(e => {
-
     const cleanDate  = e.event_date?.split("T")[0] ?? e.event_date;
     const cleanPrice = Number(e.price).toFixed(2);
-    const clubClass  = e.location_name.replace(/\s+/g,"");
+    const clubClass  = e.location_name.replace(/\s+/g, "");
 
     const imgSrc = (e.image && e.image !== "NULL")
       ? e.image
@@ -73,20 +72,19 @@ function displayEvents(eventList) {
       <p><strong>Location:</strong> ${e.location_name}</p>
       <p>${e.description ?? ""}</p>
 
-
-  <div class="event-footer">
-    <span class="price">$${cleanPrice}</span>
-    <button class="buy-button"
-      data-event-id="${e.event_id}"
-      data-title="${e.title.replace(/"/g, '&quot;')}"
-      data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
-      data-location="${e.location_name.replace(/"/g, '&quot;')}"
-      data-date="${cleanDate}"
-      data-time="${e.event_time}"
-      data-price="${cleanPrice}">
-      Buy
-    </button>
-  </div>
+      <div class="event-footer">
+        <span class="price">$${cleanPrice}</span>
+        <button class="buy-button"
+          data-event-id="${e.event_id}"
+          data-title="${e.title.replace(/"/g, '&quot;')}"
+          data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
+          data-location="${e.location_name.replace(/"/g, '&quot;')}"
+          data-date="${cleanDate}"
+          data-time="${e.event_time}"
+          data-price="${cleanPrice}">
+          Buy
+        </button>
+      </div>
     `;
 
     eventGrid.appendChild(card);
@@ -94,6 +92,7 @@ function displayEvents(eventList) {
 
   mixer.forceRefresh();
 }
+
 
 fetch("http://localhost:5000/api/events")
   .then(res => res.json())
@@ -103,10 +102,12 @@ fetch("http://localhost:5000/api/events")
     updateFilterOptions();
   });
 
+
 const mixer = mixitup("#eventGrid", {
   selectors: { target: ".mix" },
   animation: { duration: 250 }
 });
+
 
 function updateFilterOptions() {
   filterValue.innerHTML = "";
@@ -134,8 +135,8 @@ function updateFilterOptions() {
 
     option.value =
       type === "club"
-        ? "." + o.replace(/\s+/g, "")          
-        : `[data-${type}='${o}']`;            
+        ? "." + o.replace(/\s+/g, "") 
+        : `[data-${type}='${o}']`;
 
     option.textContent = o;
     filterValue.appendChild(option);
@@ -144,19 +145,17 @@ function updateFilterOptions() {
   mixer.filter("all");
 }
 
-
 filterType.addEventListener("change", updateFilterOptions);
+
 filterValue.addEventListener("change", () =>
   mixer.filter(filterValue.value === "all" ? "all" : filterValue.value)
 );
+
+
+
+
 </script>
-<footer class="site-footer">
-    <p>
-      © CampusEvents2025 · 
-      <a href="about.html">About</a> · 
-      <a href="contactfoot.html">Contact</a> · 
-      <a href="privacy.html">Privacy</a>
-    </p>
-</footer>
+
+
 </body>
 </html>

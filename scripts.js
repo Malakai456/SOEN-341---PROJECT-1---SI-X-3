@@ -236,7 +236,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       body: JSON.stringify({ user_id: user.user_id, event_id })
     });
 
-    console.log(' Fetch completed:', res.status);
+  
 
     if (!res.ok) {
       const msg = await res.text();
@@ -273,7 +273,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
 
 
 document.addEventListener('click', (e) => {
-  const btn = e.target.closest('[data-event-id]');
+  const btn = e.target.closest('.buy-button');
   if (!btn) return;
   const id = Number(btn.getAttribute('data-event-id'));
   if (!id) return;
@@ -287,6 +287,7 @@ document.addEventListener('click', (e) => {
     btn.getAttribute('data-price') || ''
   );
 });
+
 
 
 // LOGIN FOR ADMIN

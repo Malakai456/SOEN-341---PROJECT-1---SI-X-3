@@ -337,32 +337,41 @@ app.get("/api/admin/stats", async (req, res) => {
 });
 
 
-// app.get('/api/user-events/:user_id', async (req, res) => {
-//     const userId = req.params.user_id;
+// GET PURCHASE HISTORY FOR A USER
+app.get('/api/users/:id/purchases', async (req, res) => {
+  const userId = req.params.id;
 
-//     try {
-//         const [rows] = await db.execute(`
-//             SELECT 
-//                 e.event_id,
-//                 e.title,
-//                 e.description,
-//                 e.image,
-//                 e.event_date AS date,
-//                 e.event_time AS time,
-//                 e.location_name AS location,
-//                 e.price
-//             FROM bought_events b
-//             JOIN events e ON b.event_id = e.event_id
-//             WHERE b.user_id = ?
-//         `, [userId]);
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        bt.user_id,
+        bt.event_id,
+        bt.time AS purchase_time,
+        CONCAT(bt.user_id, '-', bt.event_id) AS ticket_code,
 
-//         res.json(rows);
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send("Server Error");
-//     }
-// });
+        e.title,
+        e.description,
+        e.image,
+        e.event_date,
+        e.event_time,
+        e.location_name,
+        e.price,
 
+        u.first_name,
+        u.last_name
+      FROM bought_tickets bt
+      JOIN newevents e ON bt.event_id = e.event_id
+      JOIN users u ON bt.user_id = u.user_id
+      WHERE bt.user_id = ?
+      ORDER BY bt.time DESC
+    `, [userId]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching purchase history:", err);
+    res.status(500).send("Database error fetching purchases.");
+  }
+});
 
 
 

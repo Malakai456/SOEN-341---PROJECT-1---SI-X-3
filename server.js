@@ -1,12 +1,13 @@
 const mysql = require('mysql2/promise');
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
+
 const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static('public'));
 // app.use("/uploads", express.static("uploads"));
 
 
@@ -65,6 +66,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
 // EVENT ORGANIZER REGISTER / LOGIN
 
 app.post('/registerEventOrg', async (req, res) => {
@@ -102,6 +104,40 @@ app.post('/loginEventOrg', async (req, res) => {
     res.status(500).send('Error logging in.');
   }
 });
+
+// Purchase logic -- Add pruchases table & relations routing
+
+app.get('/api/me/purchases', (req, res) => {
+  const user_id = req.query.user_id;
+
+  if(!user_id){
+    return  res.status(400).send('Missing userId parameter');
+  }
+
+  const query = `
+        SELECT 
+            p.purchase_id,
+            e.title AS title,
+            e.starts_at AS starts_at,
+            p.price_paid AS price,
+            p.purchase_date AS purchaseDate
+        FROM purchases p
+        JOIN events e ON p.event_id = e.event_id
+        WHERE p.user_id = ?
+        ORDER BY p.purchase_date DESC
+    `;
+  db.query(query, [user_id], (err, results) => {
+    if (err){
+      console.error('Error fetching purchases:', err);
+      return res.status(500).send({error: 'Database error fetchhing purchases'});
+    }
+
+    res.json(results);
+  });
+
+
+});
+
 
 
 // EVENT CREATION + RETRIEVAL

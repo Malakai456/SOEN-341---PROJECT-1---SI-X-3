@@ -12,7 +12,7 @@ async function registerUser() {
 
 try{
         
-        const response = await fetch('http://localhost:5000/register', {
+        const response = await fetch('http://localhost:5001/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newClient),
@@ -38,7 +38,7 @@ async function loginUser() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://localhost:5000/login', {
+        const response = await fetch('http://localhost:5001/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -103,7 +103,7 @@ async function registerEventOrganizer() {
 console.log(newEventOrg)
 try{
         
-        const response = await fetch('http://localhost:5000/registerEventOrg', {
+        const response = await fetch('http://localhost:5001/registerEventOrg', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEventOrg),
@@ -124,30 +124,60 @@ try{
 
 
 async function loginEventOrganizer() {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value.trim();
+  if (!username || !password) {
+    alert('Please enter username and password.');
+    return;
+  }
 
-    try {
-        const response = await fetch('http://localhost:5000/loginEventOrg', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-        });
+  try {
+    const res = await fetch('/loginEventOrg', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
 
-        if (response.ok) {
-            const user = await response.json();
-           localStorage.setItem('currentUser', JSON.stringify(user));
-           alert('Login successful!');
-            window.location.href = './create_events.html';
-        } else {
-            const error = await response.text();
-            console.log(error)
-            alert('Login failed: ' + error);
-        }
-    } catch (err) {
-        console.error(err);
-        alert('Failed to login. Please try again later.');
+    if (!res.ok) {
+      const msg = await res.text().catch(()=>'Login failed');
+      alert('Login failed: ' + msg);
+      return;
     }
+
+    const data = await res.json();
+    const status = data.status ?? 'approved';
+
+    const organizer = {
+      user_id:    data.user_id,
+      username:   data.username ?? '',
+      first_name: data.first_name ?? '',
+      last_name:  data.last_name ?? '',
+      email:      data.email ?? '',
+      status,
+      role: 'organizer'
+    };
+    localStorage.setItem('currentOrganizer', JSON.stringify(organizer));
+
+    localStorage.setItem('currentUser', JSON.stringify({
+      user_id:    organizer.user_id,
+      username:   organizer.username,
+      first_name: organizer.first_name,
+      last_name:  organizer.last_name,
+      email:      organizer.email,
+      role:       'organizer'
+    }));
+
+    if (status !== 'approved') {
+      alert(`Your organizer account is "${status}". Please wait for admin approval.`);
+      return;
+    }
+
+    alert('Login successful!');
+    window.location.href = './create_events.html';
+  } catch (err) {
+    console.error(err);
+    alert('Failed to login. Please try again later.');
+  }
 }
 function getLoggedUser() {
   try {
@@ -195,13 +225,12 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
     return;
   }
 
-  const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title}"?`);
+  const confirmPurchase = confirm(`Are you sure you want to buy a ticket for "${title || 'this event'}"?`);
   if (!confirmPurchase) return;
 
   try {
-    console.log('➡️ Starting buyEvent:', { user_id: user.user_id, event_id });
-
-    const res = await fetch('http://localhost:5000/buy', {
+   
+    const res = await fetch('http://localhost:5001/buy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.user_id, event_id })
@@ -211,6 +240,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
 
     if (!res.ok) {
       const msg = await res.text();
+      alert(msg || 'Could not complete purchase.');
       return;
     }
     let userCalendar = JSON.parse(localStorage.getItem('userCalendar')) || [];
@@ -254,18 +284,17 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.buy-button');
   if (!btn) return;
-
-  const id       = Number(btn.dataset.eventId);
-  const title    = btn.dataset.title;
-  const details  = btn.dataset.details;
-  const location = btn.dataset.location;
-  const date     = btn.dataset.date;
-  const time     = btn.dataset.time;
-  const price    = Number(btn.dataset.price);
-
-  if (id) {
-    buyEvent(id, title, details, location, date, time, price);
-  }
+  const id = Number(btn.getAttribute('data-event-id'));
+  if (!id) return;
+  buyEvent(
+    id,
+    btn.getAttribute('data-title') || '',
+    btn.getAttribute('data-desc') || '',
+    btn.getAttribute('data-location') || '',
+    btn.getAttribute('data-date') || '',
+    btn.getAttribute('data-time') || '',
+    btn.getAttribute('data-price') || ''
+  );
 });
 
 

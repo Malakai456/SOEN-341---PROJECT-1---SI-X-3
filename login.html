@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <title>Login Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" type="text/css" href="public/styles.css" />
+  <title>Login Page</title>
 </head>
-<body>      
+<body>
 <header>
-
 <h2 class="logo">
   <!-- <img src="CU-logo-design-vector-Graphics-18354798-1.jpg" alt="CampusConnect Logo"> -->
 </h2>
@@ -18,41 +17,77 @@
    <nav class = "navigation">
         <a href="mainpage.html"> Home</a>
         <a href="contact.html"> Contact</a>
+        <a href="my_purchases.html">My Purchases</a>
         <a href="register.html" class="signInButton">Sign In</a>
         <a href="login.html" class="loginbutton">Log In</a>
    </nav>
 </header>    
 <div class="homepage">
-    <form id="loginForm">
-    <h1>Login</h1>
+ <form id="loginForm" novalidate>
+  <h1>Login</h1>
 
-    <div class="input-text">
-        <input type="text" id="username" name="username" placeholder="Username" required> 
-        </div>
+  <div class="input-text">
+    <input type="text" id="username" name="username" placeholder="Username" required />
+  </div>
 
-        <div class="input-text">
-        <input type="password" id="password" placeholder="Password" required>
-       </div>
-       <button type="button" onclick="loginUser()">Login</button>
+  <div class="input-text">
+    <input type="password" id="password" name="password" placeholder="Password" required />
+  </div>
 
-    <div class="register">
-        <p>Don't have an account? <a href="./register.html"> Register here!</a></p>
-    </div>
+  <button id="loginBtn" type="submit">Login</button>
 
-    <div class="business">
-        <p>Event Organizer? <a href ="loginOrganizer.html">LogIn</a> <a href= "registerOrganizer.html" > Sign Up</a></p>
-    </div>
+  <div class="register">
+    <p>Don't have an account? <a href="./register.html">Register here!</a></p>
+  </div>
 
-  <div class="admin">
-        <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
-    </div>
-
-
-    </form>
-    
+  <div class="business">
+    <p>Business administrator?
+      <a href="loginOrganizer.html">Log In</a>
+      <a href="registerOrganizer.html">Sign Up</a>
+    </p>
+  </div>
+</form>
 </div>
-<script src="scripts.js"></script> 
+
+<div class="business">
+  <p>Event Organizer? <a href ="loginOrganizer.html">LogIn</a> <a href= "registerOrganizer.html" > Sign Up</a></p>
+</div>
+
+<div class="admin">
+  <p>Admin? <a href ="loginAdmin.html">LogIn</a></p>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById("loginForm");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const res = await fetch("http://localhost:5001/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+
+      if (!res.ok) {
+        alert("Invalid username or password");
+        return;
+      }
+
+      const user = await res.json();
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      window.location.href = "events.html";
+    } catch (err) {
+      console.error(err);
+      alert("Invalid username or password");
+    }
+  });
+});
+</script>
+
 </body>
-
-
 </html>

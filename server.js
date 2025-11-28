@@ -1,12 +1,12 @@
 const mysql = require('mysql2/promise');
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // app.use("/uploads", express.static("uploads"));
 
 
@@ -43,9 +43,10 @@ app.post('/register', async (req, res) => {
   }
 });
 
-// USER LOGIN
-app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
+// USER LOGIN (both /login and /api/login for compatibility)
+async function handleUserLogin(req, res) {
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).send('Missing username or password.');
   try {
     const [results] = await db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password]);
     if (!results.length) return res.status(401).send('Invalid username or password.');
@@ -63,7 +64,11 @@ app.post('/login', async (req, res) => {
     console.error(err);
     res.status(500).send('Error logging in.');
   }
-});
+}
+
+app.post('/login', handleUserLogin);
+app.post('/api/login', handleUserLogin);
+
 
 // EVENT ORGANIZER REGISTER / LOGIN
 
@@ -83,7 +88,8 @@ app.post('/registerEventOrg', async (req, res) => {
 });
 
 app.post('/loginEventOrg', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password } = req.body || {};
+  if (!username || !password) return res.status(400).send('Missing username or password.');
   try {
     const [results] = await db.query('SELECT * FROM event_organizers WHERE username = ? AND password = ?', [username, password]);
     if (!results.length) return res.status(401).send('Invalid username or password.');
@@ -103,8 +109,42 @@ app.post('/loginEventOrg', async (req, res) => {
   }
 });
 
+// Purchase logic -- Add pruchases table & relations routing
 
-//EVENT CREATION + RETRIEVAL
+app.get('/api/me/purchases', (req, res) => {
+  const user_id = req.query.user_id;
+
+  if(!user_id){
+    return  res.status(400).send('Missing userId parameter');
+  }
+
+  const query = `
+        SELECT 
+            p.purchase_id,
+            e.title AS title,
+            e.starts_at AS starts_at,
+            p.price_paid AS price,
+            p.purchase_date AS purchaseDate
+        FROM purchases p
+        JOIN events e ON p.event_id = e.event_id
+        WHERE p.user_id = ?
+        ORDER BY p.purchase_date DESC
+    `;
+  db.query(query, [user_id], (err, results) => {
+    if (err){
+      console.error('Error fetching purchases:', err);
+      return res.status(500).send({error: 'Database error fetchhing purchases'});
+    }
+
+    res.json(results);
+  });
+
+
+});
+
+
+
+// EVENT CREATION + RETRIEVAL
 app.post('/api/events', async (req, res) => {
   const { org_id, title, description, event_date, event_time, location_name, capacity, ticket_policy, price } = req.body;
   try {
@@ -165,6 +205,49 @@ app.post('/buy', async (req, res) => {
   }
 });
 
+// USER PURCHASE HISTORY
+app.get('/api/users/:userId/purchases', async (req, res) => {
+  const userId = Number(req.params.userId);
+  if (!userId) return res.status(400).send('Invalid user id');
+
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        b.user_id,
+        b.event_id,
+        b.purchase_date AS purchase_time,
+        e.title,
+        e.description,
+        DATE(e.event_date) AS event_date,
+        e.event_time,
+        e.location_name,
+        CAST(e.price AS DECIMAL(10,2)) AS price,
+        COALESCE(e.image, "") AS image,
+        u.first_name,
+        u.last_name,
+        u.email,
+        CONCAT(
+          'TICKET-',
+          b.user_id,
+          '-',
+          b.event_id,
+          '-',
+          LPAD(MOD(UNIX_TIMESTAMP(b.purchase_date), 1000000), 6, '0')
+        ) AS ticket_code
+      FROM bought_tickets b
+      JOIN newEvents e ON b.event_id = e.event_id
+      JOIN users u ON b.user_id = u.user_id
+      WHERE b.user_id = ?
+      ORDER BY b.time DESC
+    `, [userId]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching purchases:', err);
+    res.status(500).send('Error fetching purchases');
+  }
+});
+
 
 app.get('/api/event-analytics', async (req, res) => {
   try {
@@ -202,7 +285,7 @@ app.get('/export-csv/:event_id', async (req, res) => {
         e.event_date,
         e.event_time,
         e.price AS ticket_price,
-        b.time AS purchase_time
+        b.purchase_date AS purchase_time
       FROM bought_tickets b
       JOIN users u ON b.user_id = u.user_id
       JOIN newevents e ON b.event_id = e.event_id
@@ -250,27 +333,42 @@ app.put('/api/approve-organizer/:id', async (req, res) => {
   }
 });
 
+// app.get('/api/events/moderate', async (req, res) => {
+//   try {
+//     const [rows] = await db.query("SELECT * FROM newevents WHERE status = 'pending'");
+//     res.json(rows);
+//   } catch (err) {
+//     console.error(' Error', err);
+//     res.status(500).send(err.message);
+//   }
+// });
 
-app.get('/api/events/moderate', async (req, res) => {
-  try {
-    const [rows] = await db.query(`
-      SELECT 
-        e.event_id,
-        e.title,
-        e.status,
-        COALESCE(CONCAT(o.first_name, ' ', o.last_name), 'Unknown') AS organizer_name
-      FROM newevents e
-      LEFT JOIN event_organizers o
+app.get('/api/events/moderate', (req, res) => {
+  const sql = `
+    SELECT 
+      e.event_id,
+      e.title,
+      e.status,
+      e.org_id,
+      o.first_name,
+      o.last_name,
+      CONCAT(o.first_name, ' ', o.last_name) AS organizer_name
+    FROM newevents e
+    JOIN event_organizers o 
       ON e.org_id = o.org_id
-      WHERE e.status = 'pending';
-    `);
+    WHERE e.status = 'pending';
+  `;
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error(" Error", err);
+      return res.status(500).send("Database error");
+    }
 
     res.json(rows);
-  } catch (err) {
-    console.error(" /api/events/moderate:", err);
-    res.status(500).json({ error: err.message });
-  }
+  });
 });
+
 
 app.put('/api/events/approve/:id', async (req, res) => {
   try {

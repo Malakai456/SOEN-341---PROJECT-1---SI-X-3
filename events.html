@@ -77,14 +77,13 @@ function displayEvents(eventList) {
         <span class="price">$${cleanPrice}</span>
         <button class="buy-button"
           data-event-id="${e.event_id}"
-          data-title="${e.title.replace(/"/g, '&quot;')}"
-          data-details="${(e.description ?? '').replace(/"/g, '&quot;')}"
-          data-location="${e.location_name.replace(/"/g, '&quot;')}"
+          data-title="${(e.title ?? '').replace(/"/g,'&quot;')}"
+          data-desc="${(e.description ?? '').replace(/"/g,'&quot;')}"
+          data-location="${(e.location_name ?? '').replace(/"/g,'&quot;')}"
           data-date="${cleanDate}"
-          data-time="${e.event_time}"
-          data-price="${cleanPrice}">
-          Buy
-        </button>
+          data-time="${e.event_time ?? ''}"
+          data-price="${cleanPrice}"
+          data-image="${(e.image ?? '').replace(/"/g,'&quot;')}">Buy</button>
       </div>
     `;
 
@@ -94,8 +93,7 @@ function displayEvents(eventList) {
   mixer.forceRefresh();
 }
 
-
-fetch("http://localhost:5000/api/events")
+fetch("http://localhost:5001/api/events")
   .then(res => res.json())
   .then(data => {
     events = data;

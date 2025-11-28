@@ -25,50 +25,10 @@
 
   <main class="purchases-shell">
     <section class="purchases-card">
-      <div class="purchases-title">
-        <h1 class="page-title">My Purchases</h1>
-        <div class="search-row">
-          <div class="search-bar">
-            <span class="search-icon" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1fa4c7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="7"></circle>
-                <line x1="16.65" y1="16.65" x2="21" y2="21"></line>
-              </svg>
-            </span>
-            <input type="text" id="purchaseSearch" class="purchase-search" placeholder="Search all orders">
-          </div>
-          <button type="button" id="filterToggle" class="filter-btn">Filter</button>
-        </div>
-        <div class="filter-panel" id="filterPanel">
-          <div class="filter-grid">
-            <label>
-              <span class="filter-label">Sort By</span>
-              <select id="sortBy" class="filter-input">
-                <option value="">None</option>
-                <option value="date">Date</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name-asc">Name: A to Z</option>
-                <option value="name-desc">Name: Z to A</option>
-              </select>
-            </label>
-            <label>
-              <span class="filter-label">From</span>
-              <input type="date" id="filterFrom" class="filter-input">
-            </label>
-            <label>
-              <span class="filter-label">To</span>
-              <input type="date" id="filterTo" class="filter-input">
-            </label>
-          </div>
-          <div class="filter-actions">
-            <button type="button" id="clearFilters" class="clear-filters">Clear Filters</button>
-          </div>
-        </div>
-      </div>
       <div class="purchases-heading">
         <div>
           <p class="eyebrow">Profile</p>
+          <h1>My Purchases</h1>
           <p class="subhead">Your tickets and receipts live here. Open a ticket to preview its QR code.</p>
         </div>
         <button id="refreshPurchases" class="ghost-btn">Refresh</button>
@@ -122,13 +82,6 @@
     const statusEl = document.getElementById('purchasesStatus');
     const tbody = document.getElementById('purchasesBody');
     const refreshBtn = document.getElementById('refreshPurchases');
-    const filterBtn = document.getElementById('filterToggle');
-    const filterPanel = document.getElementById('filterPanel');
-    const sortSelect = document.getElementById('sortBy');
-    const fromInput = document.getElementById('filterFrom');
-    const toInput = document.getElementById('filterTo');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    const searchInput = document.getElementById('purchaseSearch');
     const ticketModal = document.getElementById('ticketModal');
     const qrCodeBox = document.getElementById('qrCodeBox');
     const modalEventTitle = document.getElementById('modalEventTitle');
@@ -203,67 +156,6 @@
       });
     }
 
-    function applyFilters() {
-      if (!purchaseCache.length) {
-        renderPurchases([]);
-        setStatus('No purchases found.', 'info');
-        return;
-      }
-
-      let filtered = purchaseCache.slice();
-      const query = (searchInput?.value || '').trim().toLowerCase();
-      const sortBy = sortSelect?.value || '';
-      const fromVal = fromInput?.value ? new Date(fromInput.value) : null;
-      const toVal = toInput?.value ? new Date(toInput.value) : null;
-      const dateValue = (val) => {
-        const d = new Date(val);
-        return isNaN(d) ? null : d.getTime();
-      };
-
-      if (query) {
-        filtered = filtered.filter((p) =>
-          (p.title || '').toLowerCase().includes(query)
-        );
-      }
-
-      if (fromVal && !isNaN(fromVal)) {
-        filtered = filtered.filter((p) => {
-          const d = new Date(p.event_date);
-          return !isNaN(d) && d >= fromVal;
-        });
-      }
-
-      if (toVal && !isNaN(toVal)) {
-        const endOfDay = new Date(toVal);
-        endOfDay.setHours(23, 59, 59, 999);
-        filtered = filtered.filter((p) => {
-          const d = new Date(p.event_date);
-          return !isNaN(d) && d <= endOfDay;
-        });
-      }
-
-      if (sortBy === 'date') {
-        filtered.sort((a, b) => (dateValue(a.event_date) || 0) - (dateValue(b.event_date) || 0));
-      } else if (sortBy === 'price-asc') {
-        filtered.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
-      } else if (sortBy === 'price-desc') {
-        filtered.sort((a, b) => Number(b.price || 0) - Number(a.price || 0));
-      } else if (sortBy === 'name-asc') {
-        filtered.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-      } else if (sortBy === 'name-desc') {
-        filtered.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
-      }
-
-      renderPurchases(filtered);
-
-      const total = purchaseCache.length;
-      const hasFilters = !!(query || sortBy || fromVal || toVal);
-      setStatus(
-        `Showing ${filtered.length}${hasFilters ? ` of ${total}` : ''} purchase${filtered.length === 1 ? '' : 's'}.`,
-        'success'
-      );
-    }
-
     function buildTicketData(purchase) {
       const fullName = `${purchase.first_name ?? ''} ${purchase.last_name ?? ''}`.trim();
       const ticketUrl = `${window.location.origin}/ticket.html?ticketId=${encodeURIComponent(purchase.ticket_code)}`;
@@ -329,7 +221,6 @@
       if (!user?.user_id) {
         setStatus('Log in to see your purchases.', 'warn');
         renderEmpty('You need to log in to view purchased tickets.');
-        purchaseCache = [];
         return;
       }
 
@@ -345,7 +236,8 @@
 
         const data = await res.json();
         purchaseCache = Array.isArray(data) ? data : [];
-        applyFilters();
+        renderPurchases(purchaseCache);
+        setStatus(`Showing ${purchaseCache.length} purchase${purchaseCache.length === 1 ? '' : 's'}.`, 'success');
       } catch (err) {
         console.error(err);
         setStatus(err.message || 'Could not load purchases.', 'error');
@@ -368,21 +260,6 @@
     });
 
     refreshBtn.addEventListener('click', loadPurchases);
-    filterBtn.addEventListener('click', () => {
-      filterPanel.classList.toggle('is-open');
-    });
-
-    searchInput.addEventListener('input', applyFilters);
-    sortSelect.addEventListener('change', applyFilters);
-    fromInput.addEventListener('change', applyFilters);
-    toInput.addEventListener('change', applyFilters);
-    clearFiltersBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      sortSelect.value = '';
-      fromInput.value = '';
-      toInput.value = '';
-      applyFilters();
-    });
 
     loadPurchases();
   </script>

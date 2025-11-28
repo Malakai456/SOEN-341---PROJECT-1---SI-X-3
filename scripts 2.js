@@ -12,7 +12,7 @@ async function registerUser() {
 
 try{
         
-        const response = await fetch('http://localhost:5000/register', {
+        const response = await fetch('http://localhost:5001/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newClient),
@@ -38,7 +38,7 @@ async function loginUser() {
     const password = document.getElementById('password').value;
 
     try {
-        const response = await fetch('http://localhost:5000/login', {
+        const response = await fetch('http://localhost:5001/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -103,7 +103,7 @@ async function registerEventOrganizer() {
 console.log(newEventOrg)
 try{
         
-        const response = await fetch('http://localhost:5000/registerEventOrg', {
+        const response = await fetch('http://localhost:5001/registerEventOrg', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newEventOrg),
@@ -232,7 +232,7 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
   try {
     console.log('➡️ Starting buyEvent:', { user_id: user.user_id, event_id });
 
-    const res = await fetch('http://localhost:5000/buy', {
+    const res = await fetch('http://localhost:5001/buy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ user_id: user.user_id, event_id })
@@ -354,4 +354,3 @@ document.addEventListener('click', (e) => {
   const eventId = Number(idStr);
   if (eventId) buyEvent(eventId);
 });
-

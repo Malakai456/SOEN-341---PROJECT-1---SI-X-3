@@ -152,6 +152,37 @@ filterValue.addEventListener("change", () =>
 );
 
 
+// document.addEventListener("click", e => {
+//     const btn = e.target.closest(".buy-button");
+//     if (!btn) return;
+
+//     const title    = btn.dataset.title;
+//     const details  = btn.dataset.details;
+//     const location = btn.dataset.location;
+//     const date     = btn.dataset.date;
+//     const time     = btn.dataset.time;
+//     const price    = btn.dataset.price;
+
+//     saveEventToCalendar({ title, details, location, date, time, price });
+// });
+
+
+// function saveEventToCalendar(ev) {
+//     let userCalendar = JSON.parse(localStorage.getItem("userCalendar")) || [];
+
+//     userCalendar.push({
+//         title: ev.title,
+//         details: ev.details,
+//         location: ev.location,
+//         date: ev.date,
+//         time: ev.time,
+//         price: ev.price
+//     });
+
+//     localStorage.setItem("userCalendar", JSON.stringify(userCalendar));
+
+//     console.log("Saved to calendar:", userCalendar);
+// }
 
 
 </script>

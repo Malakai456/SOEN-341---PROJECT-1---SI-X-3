@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8"/>
   <title>Your Ticket</title>
-  <link rel="stylesheet" href="public/styles.css"/>
+  <link rel="stylesheet" href="/styles.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script defer src="/ticket.js"></script>
@@ -15,7 +16,8 @@
       width: 90%;
       max-width: 900px;
       margin-top: 40px;
-    background: #154bb5;   
+    background: white;
+    color: black; 
     align-items: center;
       justify-self: anchor-center;  
       padding: 30px;
@@ -42,6 +44,7 @@
 }
 
     .details {
+      color:black;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -49,9 +52,7 @@
       font-size: 16px;
     }
 
-    .details strong {
-      color: #ffd479;
-    }
+    
 
     hr {
       border: none;
@@ -104,18 +105,24 @@
         <p><strong>Ticket ID:</strong> <span id="ticketId"></span></p>
       </div>
     </section>
+<button id="downloadBtn" class="download-btn">Download Ticket</button>
 
     <hr>
     <h2>Show This Code at the Entrance</h2>
     <div id="qrcode"></div>
   </main>
-<footer class="site-footer">
-    <p>
-      © CampusEvents2025 · 
-      <a href="about.html">About</a> · 
-      <a href="contactfoot.html">Contact</a> · 
-      <a href="privacy.html">Privacy</a>
-    </p>
-</footer>
+<script>
+document.getElementById("downloadBtn").addEventListener("click", function () {
+    const ticket = document.querySelector(".ticket-card");
+
+    html2canvas(ticket, { scale: 2 }).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "ticket.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+});
+</script>
+
 </body>
 </html>

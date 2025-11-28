@@ -243,7 +243,16 @@ async function buyEvent(event_id, title, details, location, date, time, price) {
       alert(msg || 'Could not complete purchase.');
       return;
     }
-
+    let userCalendar = JSON.parse(localStorage.getItem('userCalendar')) || [];
+    userCalendar.push({
+        title: title,
+        date: date,
+        time: time,
+        details: details,
+        location: location,
+        price: price
+    });
+    localStorage.setItem('userCalendar', JSON.stringify(userCalendar));
     const ticketId = 'TICKET-' + Math.floor(Math.random() * 1000000);
   
 

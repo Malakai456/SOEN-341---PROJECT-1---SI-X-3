@@ -1,7 +1,6 @@
 const mysql = require('mysql2/promise');
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
 const PORT = 5001;
 
@@ -70,6 +69,7 @@ async function handleUserLogin(req, res) {
 app.post('/login', handleUserLogin);
 app.post('/api/login', handleUserLogin);
 
+
 // EVENT ORGANIZER REGISTER / LOGIN
 
 app.post('/registerEventOrg', async (req, res) => {
@@ -108,6 +108,40 @@ app.post('/loginEventOrg', async (req, res) => {
     res.status(500).send('Error logging in.');
   }
 });
+
+// Purchase logic -- Add pruchases table & relations routing
+
+app.get('/api/me/purchases', (req, res) => {
+  const user_id = req.query.user_id;
+
+  if(!user_id){
+    return  res.status(400).send('Missing userId parameter');
+  }
+
+  const query = `
+        SELECT 
+            p.purchase_id,
+            e.title AS title,
+            e.starts_at AS starts_at,
+            p.price_paid AS price,
+            p.purchase_date AS purchaseDate
+        FROM purchases p
+        JOIN events e ON p.event_id = e.event_id
+        WHERE p.user_id = ?
+        ORDER BY p.purchase_date DESC
+    `;
+  db.query(query, [user_id], (err, results) => {
+    if (err){
+      console.error('Error fetching purchases:', err);
+      return res.status(500).send({error: 'Database error fetchhing purchases'});
+    }
+
+    res.json(results);
+  });
+
+
+});
+
 
 
 // EVENT CREATION + RETRIEVAL
@@ -399,5 +433,36 @@ app.get("/api/admin/stats", async (req, res) => {
     res.status(500).send("Database error.");
   }
 });
+
+
+// app.get('/api/user-events/:user_id', async (req, res) => {
+//     const userId = req.params.user_id;
+
+//     try {
+//         const [rows] = await db.execute(`
+//             SELECT 
+//                 e.event_id,
+//                 e.title,
+//                 e.description,
+//                 e.image,
+//                 e.event_date AS date,
+//                 e.event_time AS time,
+//                 e.location_name AS location,
+//                 e.price
+//             FROM bought_events b
+//             JOIN events e ON b.event_id = e.event_id
+//             WHERE b.user_id = ?
+//         `, [userId]);
+
+//         res.json(rows);
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Server Error");
+//     }
+// });
+
+
+
+
 
 app.listen(PORT, () => console.log(` Server running on port ${PORT}`));

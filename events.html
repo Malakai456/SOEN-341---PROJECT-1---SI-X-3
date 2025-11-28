@@ -11,7 +11,7 @@
   <h2 class="companyname">
     <a href="mainpage.html" style="color: inherit; text-decoration: none;">CampusEvents</a>
   </h2>
-    <nav class="navigation">
+  <nav class="navigation">
     <a href="mainpage.html">Home</a>
     <a href="contact.html">Contact</a>
     <a href="calendar.html">My Calendar</a>
@@ -51,10 +51,9 @@ function displayEvents(eventList) {
   eventGrid.innerHTML = "";
 
   eventList.forEach(e => {
-
     const cleanDate  = e.event_date?.split("T")[0] ?? e.event_date;
     const cleanPrice = Number(e.price).toFixed(2);
-    const clubClass  = e.location_name.replace(/\s+/g,"");
+    const clubClass  = e.location_name.replace(/\s+/g, "");
 
     const imgSrc = (e.image && e.image !== "NULL")
       ? e.image
@@ -102,10 +101,12 @@ fetch("http://localhost:5001/api/events")
     updateFilterOptions();
   });
 
+
 const mixer = mixitup("#eventGrid", {
   selectors: { target: ".mix" },
   animation: { duration: 250 }
 });
+
 
 function updateFilterOptions() {
   filterValue.innerHTML = "";
@@ -133,8 +134,8 @@ function updateFilterOptions() {
 
     option.value =
       type === "club"
-        ? "." + o.replace(/\s+/g, "")          
-        : `[data-${type}='${o}']`;            
+        ? "." + o.replace(/\s+/g, "") 
+        : `[data-${type}='${o}']`;
 
     option.textContent = o;
     filterValue.appendChild(option);
@@ -143,19 +144,48 @@ function updateFilterOptions() {
   mixer.filter("all");
 }
 
-
 filterType.addEventListener("change", updateFilterOptions);
+
 filterValue.addEventListener("change", () =>
   mixer.filter(filterValue.value === "all" ? "all" : filterValue.value)
 );
+
+
+// document.addEventListener("click", e => {
+//     const btn = e.target.closest(".buy-button");
+//     if (!btn) return;
+
+//     const title    = btn.dataset.title;
+//     const details  = btn.dataset.details;
+//     const location = btn.dataset.location;
+//     const date     = btn.dataset.date;
+//     const time     = btn.dataset.time;
+//     const price    = btn.dataset.price;
+
+//     saveEventToCalendar({ title, details, location, date, time, price });
+// });
+
+
+// function saveEventToCalendar(ev) {
+//     let userCalendar = JSON.parse(localStorage.getItem("userCalendar")) || [];
+
+//     userCalendar.push({
+//         title: ev.title,
+//         details: ev.details,
+//         location: ev.location,
+//         date: ev.date,
+//         time: ev.time,
+//         price: ev.price
+//     });
+
+//     localStorage.setItem("userCalendar", JSON.stringify(userCalendar));
+
+//     console.log("Saved to calendar:", userCalendar);
+// }
+
+
 </script>
-<footer class="site-footer">
-    <p>
-      © CampusEvents2025 · 
-      <a href="about.html">About</a> · 
-      <a href="contactfoot.html">Contact</a> · 
-      <a href="privacy.html">Privacy</a>
-    </p>
-</footer>
+
+
 </body>
 </html>

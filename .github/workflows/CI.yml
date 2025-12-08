@@ -23,4 +23,5 @@ jobs:
         run: npm install
 
       - name: Run tests
-        run: npm test
+        run: NODE_ENV=test npm test
+

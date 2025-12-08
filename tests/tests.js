@@ -1,5 +1,6 @@
 const request = require("supertest");
-const app = require("../server");  
+const app = require("../backend/server");
+
 
 describe("Server Basic Tests", () => {
   test("GET / should return server running message", async () => {
